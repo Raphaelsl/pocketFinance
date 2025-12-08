@@ -15,5 +15,6 @@ CREATE TABLE transactions (
                               occurred_at TIMESTAMP WITH TIME ZONE NOT NULL,
                               category_id UUID REFERENCES categories(id),
                               metadata JSONB,
-                              created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+                              created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+                              updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
