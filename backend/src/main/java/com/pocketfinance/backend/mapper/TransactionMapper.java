@@ -3,6 +3,7 @@ package com.pocketfinance.backend.mapper;
 import com.pocketfinance.backend.dto.TransactionCreateRequest;
 import com.pocketfinance.backend.dto.TransactionResponse;
 import com.pocketfinance.backend.dto.TransactionUpdateRequest;
+import com.pocketfinance.backend.model.Category;
 import com.pocketfinance.backend.model.Transaction;
 import org.springframework.stereotype.Component;
 
@@ -10,44 +11,41 @@ import org.springframework.stereotype.Component;
 public class TransactionMapper {
 
     public Transaction toEntity(TransactionCreateRequest request) {
+        Category category = Category.builder()
+                .id(request.categoryId())
+                .build();
+
         return Transaction.builder()
-                .amount(request.getAmount())
-                .currency(request.getCurrency())
-                .description(request.getDescription())
-                .occurredAt(request.getOccurredAt())
-                .metadata(request.getMetadata())
+                .amount(request.amount())
+                .description(request.description())
+                .category(category)
+                .occurredAt(request.occurredAt())
+                .currency(request.currency())
                 .build();
     }
 
-    public TransactionResponse toResponse(Transaction transaction) {
-        return TransactionResponse.builder()
-                .id(transaction.getId())
-                .amount(transaction.getAmount())
-                .currency(transaction.getCurrency())
-                .description(transaction.getDescription())
-                .occurredAt(transaction.getOccurredAt())
-                .categoryId(transaction.getCategory() != null ? transaction.getCategory().getId() : null)
-                .metadata(transaction.getMetadata())
-                .createdAt(transaction.getCreatedAt())
-                .updatedAt(transaction.getUpdatedAt())
-                .build();
+    public TransactionResponse toResponse(Transaction entity) {
+        String categoryName = entity.getCategory() != null
+                ? entity.getCategory().getName()
+                : null;
+
+        return new TransactionResponse(
+                entity.getId(),
+                entity.getAmount(),
+                entity.getDescription(),
+                categoryName,
+                entity.getOccurredAt(),
+                entity.getCurrency()
+        );
     }
 
     public void updateEntityFromRequest(TransactionUpdateRequest request, Transaction transaction) {
-        if (request.getAmount() != null) {
-            transaction.setAmount(request.getAmount());
+        if (request.amount() != null) {
+            transaction.setAmount(request.amount());
         }
-        if (request.getCurrency() != null) {
-            transaction.setCurrency(request.getCurrency());
+        if (request.description() != null) {
+            transaction.setDescription(request.description());
         }
-        if (request.getDescription() != null) {
-            transaction.setDescription(request.getDescription());
-        }
-        if (request.getOccurredAt() != null) {
-            transaction.setOccurredAt(request.getOccurredAt());
-        }
-        if (request.getMetadata() != null) {
-            transaction.setMetadata(request.getMetadata());
-        }
+        // Nota: O campo currency e metadata foram removidos pois não existem no Record TransactionUpdateRequest
     }
 }

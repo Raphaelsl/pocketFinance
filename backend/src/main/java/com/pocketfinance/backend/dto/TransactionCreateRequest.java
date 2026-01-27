@@ -2,32 +2,29 @@ package com.pocketfinance.backend.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+
+import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class TransactionCreateRequest {
 
-    @NotNull(message = "Amount is required")
-    @Positive(message = "Amount must be positive")
-    private BigDecimal amount;
+public record TransactionCreateRequest(
+        @NotNull(message = "Amount is required")
+        @Positive(message = "Amount must be positive")
+        BigDecimal amount,
 
-    private String currency;
+        @NotNull(message = "Description is required")
+        @Size(max = 255, message = "Description must not exceed 255 characters")
+        String description,
 
-    private String description;
+        @NotNull(message = "Category ID is required")
+        UUID categoryId,
 
-    private Instant occurredAt;
+        @NotNull(message = "Occurred at is required")
+        Instant occurredAt,
 
-    private UUID categoryId;
-
-    private String metadata;
-}
+        @NotNull(message = "Currency is required")
+        String currency
+){}
