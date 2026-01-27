@@ -2,11 +2,13 @@ package com.pocketfinance.backend.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
+
 
 public record TransactionCreateRequest(
         @NotNull(message = "Amount is required")
@@ -25,5 +27,4 @@ public record TransactionCreateRequest(
 
         @NotNull(message = "Currency is required")
         String currency
-) {
-}
+){}

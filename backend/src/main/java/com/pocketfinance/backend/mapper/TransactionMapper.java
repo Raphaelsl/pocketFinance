@@ -2,6 +2,7 @@ package com.pocketfinance.backend.mapper;
 
 import com.pocketfinance.backend.dto.TransactionCreateRequest;
 import com.pocketfinance.backend.dto.TransactionResponse;
+import com.pocketfinance.backend.dto.TransactionUpdateRequest;
 import com.pocketfinance.backend.model.Category;
 import com.pocketfinance.backend.model.Transaction;
 import org.springframework.stereotype.Component;
@@ -36,5 +37,15 @@ public class TransactionMapper {
                 entity.getOccurredAt(),
                 entity.getCurrency()
         );
+    }
+
+    public void updateEntityFromRequest(TransactionUpdateRequest request, Transaction transaction) {
+        if (request.amount() != null) {
+            transaction.setAmount(request.amount());
+        }
+        if (request.description() != null) {
+            transaction.setDescription(request.description());
+        }
+        // Nota: O campo currency e metadata foram removidos pois não existem no Record TransactionUpdateRequest
     }
 }

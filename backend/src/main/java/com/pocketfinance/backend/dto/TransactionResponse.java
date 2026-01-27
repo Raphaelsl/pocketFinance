@@ -1,8 +1,11 @@
 package com.pocketfinance.backend.dto;
 
+
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
+
 
 public record TransactionResponse(
         UUID id,
@@ -12,4 +15,5 @@ public record TransactionResponse(
         Instant occurredAt,
         String currency
 ) {
+
 }
