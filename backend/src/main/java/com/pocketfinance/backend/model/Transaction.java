@@ -12,7 +12,7 @@ import java.util.UUID;
 @Setter
 @Builder
 @Entity
-@Table(name = "transaction")
+@Table(name = "transactions")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Transaction {

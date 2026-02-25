@@ -1,13 +1,11 @@
 package com.pocketfinance.backend.repository;
 
-import com.pocketfinance.backend.dto.TransactionFilter;
 import com.pocketfinance.backend.model.Category;
 import com.pocketfinance.backend.model.Transaction;
 import com.pocketfinance.backend.specification.TransactionSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
@@ -181,20 +179,15 @@ class TransactionRepositoryTest {
     }
 
     @Test
-    void whenUsingSpecification_withFilter_thenReturnFilteredTransactions() {
+    void whenUsingSpecification_withCategoryFilter_thenReturnFilteredTransactions() {
         Pageable pageable = PageRequest.of(0, 10);
-
-        // Test specification with category filter
-        TransactionFilter filter = TransactionFilter.builder()
-                .categoryId(category1.getId())
-                .build();
 
         List<Transaction> transactions = Arrays.asList(transaction1, transaction3);
         Page<Transaction> expectedPage = new PageImpl<>(transactions, pageable, transactions.size());
 
         when(transactionRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(expectedPage);
 
-        Specification<Transaction> spec = TransactionSpecification.withFilter(filter);
+        Specification<Transaction> spec = TransactionSpecification.byCategoryId(category1.getId());
         Page<Transaction> result = transactionRepository.findAll(spec, pageable);
 
         assertEquals(2, result.getContent().size());
@@ -241,17 +234,15 @@ class TransactionRepositoryTest {
     void whenUsingSpecification_withMultipleFilters_thenReturnFilteredTransactions() {
         Pageable pageable = PageRequest.of(0, 10);
 
-        TransactionFilter filter = TransactionFilter.builder()
-                .categoryId(category1.getId())
-                .search("grocery")
-                .build();
-
         List<Transaction> transactions = Arrays.asList(transaction3);
         Page<Transaction> expectedPage = new PageImpl<>(transactions, pageable, transactions.size());
 
         when(transactionRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(expectedPage);
 
-        Specification<Transaction> spec = TransactionSpecification.withFilter(filter);
+        Specification<Transaction> spec = Specification.where((Specification<Transaction>) null)
+                .and(TransactionSpecification.byCategoryId(category1.getId()))
+                .and(TransactionSpecification.byDescription("grocery"));
+
         Page<Transaction> result = transactionRepository.findAll(spec, pageable);
 
         assertEquals(1, result.getContent().size());
