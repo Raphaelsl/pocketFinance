@@ -6,7 +6,8 @@ import com.pocketfinance.backend.dto.TransactionUpdateRequest;
 import com.pocketfinance.backend.model.Transaction;
 import com.pocketfinance.backend.repository.TransactionRepository;
 import com.pocketfinance.backend.specification.TransactionSpecification;
-import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -17,11 +18,16 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class TransactionServiceImpl implements TransactionService {
 
+    private static final Logger logger = LoggerFactory.getLogger(TransactionServiceImpl.class);
+
     private final TransactionRepository transactionRepository;
+
+    public TransactionServiceImpl(TransactionRepository transactionRepository) {
+        this.transactionRepository = transactionRepository;
+    }
 
     @Override
     public TransactionResponse create(TransactionCreateRequest request) {
@@ -36,12 +42,13 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
 
         Transaction saved = transactionRepository.save(transaction);
+        logger.info("Transaction created with id: {}", saved.getId());
         return mapToResponse(saved);
     }
 
     @Override
     public Page<TransactionResponse> list(Pageable pageable, UUID categoryId, Instant start, Instant end, String search) {
-        Specification<Transaction> spec = Specification.where((Specification<Transaction>) null);
+        Specification<Transaction> spec = Specification.where((root, query, criteriaBuilder) -> criteriaBuilder.conjunction());
 
         Specification<Transaction> categorySpec = TransactionSpecification.byCategoryId(categoryId);
         if (categorySpec != null) {
@@ -75,6 +82,7 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setUpdatedAt(Instant.now());
 
         Transaction updated = transactionRepository.save(transaction);
+        logger.info("Transaction updated with id: {}", id);
         return mapToResponse(updated);
     }
 
@@ -84,6 +92,7 @@ public class TransactionServiceImpl implements TransactionService {
             throw new IllegalArgumentException("Transaction not found with id: " + id);
         }
         transactionRepository.deleteById(id);
+        logger.info("Transaction deleted with id: {}", id);
     }
 
     private TransactionResponse mapToResponse(Transaction transaction) {
