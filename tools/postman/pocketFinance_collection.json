@@ -1,0 +1,190 @@
+{
+  "info": {
+    "name": "PocketFinance API",
+    "description": "Collection for PocketFinance API testing with all CRUD operations",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "pocketfinance-api-collection",
+    "version": {
+      "major": 1,
+      "minor": 0,
+      "patch": 0
+    }
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "transaction_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/health",
+          "host": ["{{base_url}}"],
+          "path": ["api", "health"]
+        },
+        "description": "Health check endpoint to verify API is running"
+      },
+      "response": []
+    },
+    {
+      "name": "Create Transaction - Valid",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 150.50,\n  \"currency\": \"BRL\",\n  \"description\": \"Compra no mercado\",\n  \"occurredAt\": \"2024-03-03T10:30:00Z\",\n  \"categoryId\": null,\n  \"metadata\": null\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/transactions",
+          "host": ["{{base_url}}"],
+          "path": ["api", "transactions"]
+        },
+        "description": "Create a new valid transaction with all required fields"
+      },
+      "response": []
+    },
+    {
+      "name": "Create Transaction - Invalid",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": -50.00,\n  \"currency\": \"\",\n  \"description\": \"\",\n  \"occurredAt\": null,\n  \"categoryId\": null,\n  \"metadata\": null\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/transactions",
+          "host": ["{{base_url}}"],
+          "path": ["api", "transactions"]
+        },
+        "description": "Create an invalid transaction to test validation (negative amount, empty description, null occurredAt)"
+      },
+      "response": []
+    },
+    {
+      "name": "List Transactions",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/transactions?page=0&size=10",
+          "host": ["{{base_url}}"],
+          "path": ["api", "transactions"],
+          "query": [
+            {
+              "key": "page",
+              "value": "0"
+            },
+            {
+              "key": "size",
+              "value": "10"
+            }
+          ]
+        },
+        "description": "List all transactions with pagination (page 0, size 10)"
+      },
+      "response": []
+    },
+    {
+      "name": "List Transactions - Filtered",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/transactions?page=0&size=10&search=mercado",
+          "host": ["{{base_url}}"],
+          "path": ["api", "transactions"],
+          "query": [
+            {
+              "key": "page",
+              "value": "0"
+            },
+            {
+              "key": "size",
+              "value": "10"
+            },
+            {
+              "key": "search",
+              "value": "mercado"
+            }
+          ]
+        },
+        "description": "List transactions with text search filter"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Transaction by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/transactions/{{transaction_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "transactions", "{{transaction_id}}"]
+        },
+        "description": "Get a specific transaction by ID. Set transaction_id variable first."
+      },
+      "response": []
+    },
+    {
+      "name": "Update Transaction",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 200.00,\n  \"currency\": \"BRL\",\n  \"description\": \"Compra atualizada no mercado\",\n  \"occurredAt\": \"2024-03-03T10:30:00Z\",\n  \"categoryId\": null,\n  \"metadata\": null\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/transactions/{{transaction_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "transactions", "{{transaction_id}}"]
+        },
+        "description": "Update an existing transaction. Set transaction_id variable first."
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Transaction",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/transactions/{{transaction_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "transactions", "{{transaction_id}}"]
+        },
+        "description": "Delete a transaction by ID. Set transaction_id variable first."
+      },
+      "response": []
+    }
+  ]
+}

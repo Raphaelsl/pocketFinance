@@ -3,6 +3,7 @@ package com.pocketfinance.backend.service;
 import com.pocketfinance.backend.dto.TransactionCreateRequest;
 import com.pocketfinance.backend.dto.TransactionResponse;
 import com.pocketfinance.backend.dto.TransactionUpdateRequest;
+import com.pocketfinance.backend.exception.NotFoundException;
 import com.pocketfinance.backend.model.Transaction;
 import com.pocketfinance.backend.repository.TransactionRepository;
 import com.pocketfinance.backend.specification.TransactionSpecification;
@@ -31,15 +32,17 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public TransactionResponse create(TransactionCreateRequest request) {
-        Transaction transaction = Transaction.builder()
-                .amount(request.amount())
-                .currency(request.currency())
-                .description(request.description())
-                .occurredAt(request.occurredAt())
-                .metadata(request.metadata())
-                .createdAt(Instant.now())
-                .updatedAt(Instant.now())
-                .build();
+        Transaction transaction = new Transaction(
+                null,
+                request.amount(),
+                request.currency(),
+                request.description(),
+                request.occurredAt(),
+                null,
+                request.metadata(),
+                Instant.now(),
+                Instant.now()
+        );
 
         Transaction saved = transactionRepository.save(transaction);
         logger.info("Transaction created with id: {}", saved.getId());
@@ -70,9 +73,16 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    public TransactionResponse getById(UUID id) {
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Transaction not found with id: " + id));
+        return mapToResponse(transaction);
+    }
+
+    @Override
     public TransactionResponse update(UUID id, TransactionUpdateRequest request) {
         Transaction transaction = transactionRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Transaction not found with id: " + id));
+                .orElseThrow(() -> new NotFoundException("Transaction not found with id: " + id));
 
         transaction.setAmount(request.amount());
         transaction.setCurrency(request.currency());
@@ -89,7 +99,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public void delete(UUID id) {
         if (!transactionRepository.existsById(id)) {
-            throw new IllegalArgumentException("Transaction not found with id: " + id);
+            throw new NotFoundException("Transaction not found with id: " + id);
         }
         transactionRepository.deleteById(id);
         logger.info("Transaction deleted with id: {}", id);
