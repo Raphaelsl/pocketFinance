@@ -1,5 +1,4 @@
 -- V1__create_tables.sql
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 CREATE TABLE categories (
                             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -1,0 +1,359 @@
+package com.pocketfinance.backend;
+
+import com.pocketfinance.backend.dto.TransactionCreateRequest;
+import com.pocketfinance.backend.dto.TransactionUpdateRequest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.*;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DisplayName("Transaction Integration Tests")
+class TransactionIntegrationTest {
+
+    @LocalServerPort
+    private int port;
+
+    @Autowired
+    private TestRestTemplate restTemplate;
+
+    private String baseUrl;
+
+    @BeforeEach
+    void setUp() {
+        baseUrl = "http://localhost:" + port + "/api/transactions";
+    }
+
+    @Test
+    @DisplayName("Should create a valid transaction successfully")
+    void shouldCreateValidTransaction() {
+        // Arrange
+        TransactionCreateRequest request = new TransactionCreateRequest(
+                new BigDecimal("150.50"),
+                "BRL",
+                "Compra no mercado",
+                Instant.now(),
+                null,
+                null
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<TransactionCreateRequest> entity = new HttpEntity<>(request, headers);
+
+        // Act
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl,
+                HttpMethod.POST,
+                entity,
+                String.class
+        );
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).contains("150.50");
+        assertThat(response.getBody()).contains("BRL");
+        assertThat(response.getBody()).contains("Compra no mercado");
+        assertThat(response.getHeaders().getLocation()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Should return 400 when creating transaction with invalid data")
+    void shouldReturn400WhenCreatingInvalidTransaction() {
+        // Arrange - Invalid request with negative amount and empty description
+        TransactionCreateRequest request = new TransactionCreateRequest(
+                new BigDecimal("-50.00"),
+                "",
+                "",
+                null,
+                null,
+                null
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<TransactionCreateRequest> entity = new HttpEntity<>(request, headers);
+
+        // Act
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl,
+                HttpMethod.POST,
+                entity,
+                String.class
+        );
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    @DisplayName("Should list transactions with pagination")
+    void shouldListTransactionsWithPagination() {
+        // Arrange - Create a transaction first
+        TransactionCreateRequest createRequest = new TransactionCreateRequest(
+                new BigDecimal("200.00"),
+                "BRL",
+                "Compra de roupas",
+                Instant.now(),
+                null,
+                null
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<TransactionCreateRequest> createEntity = new HttpEntity<>(createRequest, headers);
+
+        ResponseEntity<String> createResponse = restTemplate.exchange(
+                baseUrl,
+                HttpMethod.POST,
+                createEntity,
+                String.class
+        );
+
+        // Act
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl + "?page=0&size=10",
+                HttpMethod.GET,
+                null,
+                String.class
+        );
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).contains("content");
+    }
+
+    @Test
+    @DisplayName("Should get transaction by ID")
+    void shouldGetTransactionById() {
+        // Arrange - Create a transaction first
+        TransactionCreateRequest createRequest = new TransactionCreateRequest(
+                new BigDecimal("100.00"),
+                "BRL",
+                "Lanche",
+                Instant.now(),
+                null,
+                null
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<TransactionCreateRequest> createEntity = new HttpEntity<>(createRequest, headers);
+
+        ResponseEntity<String> createResponse = restTemplate.exchange(
+                baseUrl,
+                HttpMethod.POST,
+                createEntity,
+                String.class
+        );
+
+        UUID transactionId = extractIdFromResponse(createResponse.getBody());
+
+        // Act
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl + "/" + transactionId,
+                HttpMethod.GET,
+                null,
+                String.class
+        );
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).contains("100.00");
+        assertThat(response.getBody()).contains("Lanche");
+    }
+
+    @Test
+    @DisplayName("Should update an existing transaction")
+    void shouldUpdateTransaction() {
+        // Arrange - Create a transaction first
+        TransactionCreateRequest createRequest = new TransactionCreateRequest(
+                new BigDecimal("50.00"),
+                "BRL",
+                "Café",
+                Instant.now(),
+                null,
+                null
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<TransactionCreateRequest> createEntity = new HttpEntity<>(createRequest, headers);
+
+        ResponseEntity<String> createResponse = restTemplate.exchange(
+                baseUrl,
+                HttpMethod.POST,
+                createEntity,
+                String.class
+        );
+
+        UUID transactionId = extractIdFromResponse(createResponse.getBody());
+
+        // Update the transaction
+        TransactionUpdateRequest updateRequest = new TransactionUpdateRequest(
+                new BigDecimal("75.00"),
+                "BRL",
+                "Café e bolo",
+                Instant.now(),
+                null,
+                null
+        );
+
+        HttpEntity<TransactionUpdateRequest> updateEntity = new HttpEntity<>(updateRequest, headers);
+
+        // Act
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl + "/" + transactionId,
+                HttpMethod.PUT,
+                updateEntity,
+                String.class
+        );
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).contains("75.00");
+        assertThat(response.getBody()).contains("Café e bolo");
+    }
+
+    @Test
+    @DisplayName("Should delete a transaction")
+    void shouldDeleteTransaction() {
+        // Arrange - Create a transaction first
+        TransactionCreateRequest createRequest = new TransactionCreateRequest(
+                new BigDecimal("300.00"),
+                "BRL",
+                "Restaurante",
+                Instant.now(),
+                null,
+                null
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<TransactionCreateRequest> createEntity = new HttpEntity<>(createRequest, headers);
+
+        ResponseEntity<String> createResponse = restTemplate.exchange(
+                baseUrl,
+                HttpMethod.POST,
+                createEntity,
+                String.class
+        );
+
+        UUID transactionId = extractIdFromResponse(createResponse.getBody());
+
+        // Act
+        ResponseEntity<String> deleteResponse = restTemplate.exchange(
+                baseUrl + "/" + transactionId,
+                HttpMethod.DELETE,
+                null,
+                String.class
+        );
+
+        // Assert
+        assertThat(deleteResponse.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+
+        // Verify the transaction is deleted
+        ResponseEntity<String> getResponse = restTemplate.exchange(
+                baseUrl + "/" + transactionId,
+                HttpMethod.GET,
+                null,
+                String.class
+        );
+
+        assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("Should return 404 when getting non-existent transaction")
+    void shouldReturn404WhenGettingNonExistentTransaction() {
+        // Arrange
+        UUID nonExistentId = UUID.randomUUID();
+
+        // Act
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl + "/" + nonExistentId,
+                HttpMethod.GET,
+                null,
+                String.class
+        );
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("Should return 404 when updating non-existent transaction")
+    void shouldReturn404WhenUpdatingNonExistentTransaction() {
+        // Arrange
+        UUID nonExistentId = UUID.randomUUID();
+        TransactionUpdateRequest updateRequest = new TransactionUpdateRequest(
+                new BigDecimal("100.00"),
+                "BRL",
+                "Test",
+                Instant.now(),
+                null,
+                null
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<TransactionUpdateRequest> entity = new HttpEntity<>(updateRequest, headers);
+
+        // Act
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl + "/" + nonExistentId,
+                HttpMethod.PUT,
+                entity,
+                String.class
+        );
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("Should return 404 when deleting non-existent transaction")
+    void shouldReturn404WhenDeletingNonExistentTransaction() {
+        // Arrange
+        UUID nonExistentId = UUID.randomUUID();
+
+        // Act
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl + "/" + nonExistentId,
+                HttpMethod.DELETE,
+                null,
+                String.class
+        );
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    /**
+     * Helper method to extract UUID from JSON response
+     */
+    private UUID extractIdFromResponse(String responseBody) {
+        Pattern pattern = Pattern.compile("\"id\"\\s*:\\s*\"([0-9a-fA-F-]+)\"");
+        Matcher matcher = pattern.matcher(responseBody);
+        if (matcher.find()) {
+            return UUID.fromString(matcher.group(1));
+        }
+        throw new IllegalArgumentException("Could not extract ID from response: " + responseBody);
+    }
+}

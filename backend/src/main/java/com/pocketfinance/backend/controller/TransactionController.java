@@ -5,7 +5,6 @@ import com.pocketfinance.backend.dto.TransactionResponse;
 import com.pocketfinance.backend.dto.TransactionUpdateRequest;
 import com.pocketfinance.backend.service.TransactionService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -29,17 +28,20 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/api/transactions")
-@RequiredArgsConstructor
 public class TransactionController {
 
     private final TransactionService transactionService;
+
+    public TransactionController(TransactionService transactionService) {
+        this.transactionService = transactionService;
+    }
 
     /**
      * Creates a new financial transaction.
      * <p>
      * This endpoint accepts a transaction creation request with all required fields
      * validated. Upon successful creation, it returns HTTP 201 Created status with
-     * the Location header pointing to the newly created resource.
+     * Location header pointing to the newly created resource.
      * </p>
      *
      * @param request the transaction creation request containing amount, currency,
@@ -85,6 +87,22 @@ public class TransactionController {
     }
 
     /**
+     * Gets a transaction by its ID.
+     * <p>
+     * This endpoint retrieves a specific transaction by its unique identifier.
+     * </p>
+     *
+     * @param id the UUID of the transaction to retrieve
+     * @return ResponseEntity containing the transaction response with HTTP 200 status
+     * @throws NotFoundException if the transaction with the given ID is not found
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<TransactionResponse> getTransaction(@PathVariable UUID id) {
+        TransactionResponse response = transactionService.getById(id);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Updates an existing transaction.
      * <p>
      * This endpoint allows clients to update transaction details by providing the
@@ -96,7 +114,7 @@ public class TransactionController {
      * @param request the transaction update request containing the new values for
      *                amount, currency, description, occurredAt, categoryId (optional), and metadata (optional)
      * @return ResponseEntity containing the updated transaction response with HTTP 200 status
-     * @throws IllegalArgumentException if the transaction with the given ID is not found
+     * @throws NotFoundException if the transaction with the given ID is not found
      */
     @PutMapping("/{id}")
     public ResponseEntity<TransactionResponse> updateTransaction(
@@ -115,7 +133,7 @@ public class TransactionController {
      *
      * @param id the UUID of the transaction to delete
      * @return ResponseEntity with HTTP 204 No Content status
-     * @throws IllegalArgumentException if the transaction with the given ID is not found
+     * @throws NotFoundException if the transaction with the given ID is not found
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTransaction(@PathVariable UUID id) {

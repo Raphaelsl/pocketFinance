@@ -40,56 +40,56 @@ class TransactionRepositoryTest {
     @BeforeEach
     void setUp() {
         // Create categories
-        category1 = Category.builder()
-                .id(UUID.randomUUID())
-                .name("Food")
-                .createdAt(Instant.now())
-                .build();
+        category1 = new Category(
+                UUID.randomUUID(),
+                "Food",
+                Instant.now()
+        );
 
-        category2 = Category.builder()
-                .id(UUID.randomUUID())
-                .name("Transport")
-                .createdAt(Instant.now())
-                .build();
+        category2 = new Category(
+                UUID.randomUUID(),
+                "Transport",
+                Instant.now()
+        );
 
         // Create transactions
         Instant baseTime = Instant.now();
 
-        transaction1 = Transaction.builder()
-                .id(UUID.randomUUID())
-                .amount(new BigDecimal("100.50"))
-                .currency("BRL")
-                .description("Lunch at restaurant")
-                .occurredAt(baseTime)
-                .category(category1)
-                .metadata("{\"type\": \"restaurant\"}")
-                .createdAt(baseTime)
-                .updatedAt(baseTime)
-                .build();
+        transaction1 = new Transaction(
+                UUID.randomUUID(),
+                new BigDecimal("100.50"),
+                "BRL",
+                "Lunch at restaurant",
+                baseTime,
+                category1,
+                "{\"type\": \"restaurant\"}",
+                baseTime,
+                baseTime
+        );
 
-        transaction2 = Transaction.builder()
-                .id(UUID.randomUUID())
-                .amount(new BigDecimal("50.00"))
-                .currency("BRL")
-                .description("Bus ticket")
-                .occurredAt(baseTime.plusSeconds(3600))
-                .category(category2)
-                .metadata("{\"type\": \"transport\"}")
-                .createdAt(baseTime.plusSeconds(3600))
-                .updatedAt(baseTime.plusSeconds(3600))
-                .build();
+        transaction2 = new Transaction(
+                UUID.randomUUID(),
+                new BigDecimal("50.00"),
+                "BRL",
+                "Bus ticket",
+                baseTime.plusSeconds(3600),
+                category2,
+                "{\"type\": \"transport\"}",
+                baseTime.plusSeconds(3600),
+                baseTime.plusSeconds(3600)
+        );
 
-        transaction3 = Transaction.builder()
-                .id(UUID.randomUUID())
-                .amount(new BigDecimal("200.00"))
-                .currency("BRL")
-                .description("Grocery shopping")
-                .occurredAt(baseTime.plusSeconds(7200))
-                .category(category1)
-                .metadata("{\"type\": \"grocery\"}")
-                .createdAt(baseTime.plusSeconds(7200))
-                .updatedAt(baseTime.plusSeconds(7200))
-                .build();
+        transaction3 = new Transaction(
+                UUID.randomUUID(),
+                new BigDecimal("200.00"),
+                "BRL",
+                "Grocery shopping",
+                baseTime.plusSeconds(7200),
+                category1,
+                "{\"type\": \"grocery\"}",
+                baseTime.plusSeconds(7200),
+                baseTime.plusSeconds(7200)
+        );
     }
 
     @Test
