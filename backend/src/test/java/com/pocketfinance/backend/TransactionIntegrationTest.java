@@ -100,7 +100,7 @@ class TransactionIntegrationTest {
     }
 
     @Test
-    @DisplayName("Should list transactions with pagination")
+    @DisplayName("Should list transactions with pagination using PagedResponse DTO")
     void shouldListTransactionsWithPagination() {
         // Arrange - Create a transaction first
         TransactionCreateRequest createRequest = new TransactionCreateRequest(
@@ -116,25 +116,35 @@ class TransactionIntegrationTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<TransactionCreateRequest> createEntity = new HttpEntity<>(createRequest, headers);
 
-        ResponseEntity<String> createResponse = restTemplate.exchange(
+        restTemplate.exchange(
                 baseUrl,
                 HttpMethod.POST,
                 createEntity,
                 String.class
         );
-
-        // Act
+        // Act - Fetch the paginated list
         ResponseEntity<String> response = restTemplate.exchange(
                 baseUrl + "?page=0&size=10",
                 HttpMethod.GET,
                 null,
                 String.class
         );
-
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody()).contains("content");
+        // 1. Verificamos se as chaves do nosso novo DTO estão presentes no JSON
+        assertThat(response.getBody()).contains("\"content\":");
+        assertThat(response.getBody()).contains("\"page\":");
+        assertThat(response.getBody()).contains("\"size\":");
+        assertThat(response.getBody()).contains("\"totalElements\":");
+        assertThat(response.getBody()).contains("\"totalPages\":");
+        assertThat(response.getBody()).contains("\"first\":");
+        assertThat(response.getBody()).contains("\"last\":");
+
+        // 2. A PROVA DE FOGO: Garantimos que o "lixo" do Spring sumiu!
+        // Usamos o doesNotContain para ter certeza absoluta de que não vazou implementação.
+        assertThat(response.getBody()).doesNotContain("\"pageable\":");
+        assertThat(response.getBody()).doesNotContain("\"sort\":");
     }
 
     @Test
