@@ -1,5 +1,6 @@
 package com.pocketfinance.backend.controller;
 
+import com.pocketfinance.backend.dto.PagedResponse;
 import com.pocketfinance.backend.dto.TransactionCreateRequest;
 import com.pocketfinance.backend.dto.TransactionResponse;
 import com.pocketfinance.backend.dto.TransactionUpdateRequest;
@@ -76,14 +77,17 @@ public class TransactionController {
      * @return ResponseEntity containing a paginated list of TransactionResponse objects with HTTP 200 status
      */
     @GetMapping
-    public ResponseEntity<Page<TransactionResponse>> listTransactions(
+    public ResponseEntity<PagedResponse<TransactionResponse>> listTransactions(
             Pageable pageable,
             @RequestParam(required = false) UUID categoryId,
             @RequestParam(required = false) Instant start,
             @RequestParam(required = false) Instant end,
             @RequestParam(required = false) String search) {
+
         Page<TransactionResponse> response = transactionService.list(pageable, categoryId, start, end, search);
-        return ResponseEntity.ok(response);
+
+        // Passamos a "response" (suja) para dentro do nosso PagedResponse (o filtro)
+        return ResponseEntity.ok(new PagedResponse<>(response));
     }
 
     /**
