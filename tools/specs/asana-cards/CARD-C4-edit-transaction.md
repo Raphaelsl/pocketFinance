@@ -1,51 +1,51 @@
 # Card Asana — C4: Edit Transaction Page
 
-## Nome da tarefa
+## Task Name
 ```
 [SPEC-005] C4 — Edit Transaction: React Query + React Hook Form
 ```
 
 ---
 
-## Descrição
+## Description
 
 ```
-## 🎯 Objetivo
+## 🎯 Objective
 
-Criar a página de edição de transação introduzindo duas tecnologias novas:
-React Query (substituindo fetch + useState manual do C2) e React Hook Form
-(substituindo useState por campo do C3).
+Create a transaction edit page introducing two new technologies:
+React Query (replacing manual fetch + useState from C2) and React Hook Form
+(replacing manual useState-per-field from C3).
 
-O Dev vai sentir a diferença direta em relação ao que foi feito nos cards anteriores.
+Dev will directly feel the difference compared to what was done in previous cards.
 
-## ✅ Critérios de aceite
+## ✅ Acceptance Criteria
 
-- [ ] Página acessível em /transactions/{id}/edit
-- [ ] Busca a transação pelo ID ao carregar (GET /api/transactions/{id})
-- [ ] Formulário pré-preenchido com os dados da transação
-- [ ] Validação via React Hook Form (register + errors)
-- [ ] Submit chama PUT /api/transactions/{id}
-- [ ] Sucesso: redireciona para /transactions com cache invalidado
-- [ ] Erro: exibe mensagem
-- [ ] Botão "Editar" na lista navega para /transactions/{id}/edit
-- [ ] transactionService.getById() e update() implementados
+- [ ] Page accessible at /transactions/{id}/edit
+- [ ] Fetches transaction by ID on load (GET /api/transactions/{id})
+- [ ] Form is pre-populated with transaction data
+- [ ] Form validation via React Hook Form (register + errors)
+- [ ] Submit calls PUT /api/transactions/{id}
+- [ ] On success: redirect to /transactions with cache invalidated
+- [ ] On error: display error message
+- [ ] "Edit" button on list page navigates to /transactions/{id}/edit
+- [ ] transactionService.getById() and update() implemented
 
-## 📡 Endpoints consumidos
+## 📡 Endpoints consumed
 
-GET /api/transactions/{id} → 200 OK com Transaction
-PUT /api/transactions/{id} com body TransactionUpdateRequest → 200 OK
+GET /api/transactions/{id} → 200 OK with Transaction
+PUT /api/transactions/{id} with TransactionUpdateRequest → 200 OK
 
-## 🧠 Spike pedagógico (TL aplica antes de fechar o card)
+## 🧠 Pedagogical Spike (TL applies before closing card)
 
-Comparar lado a lado com o Dev:
+Compare side-by-side with Dev:
 - C2: useState(loading) + useState(error) + useEffect + try/catch + finally
-  → C4: useQuery() faz tudo isso
-- C3: um useState por campo + validate() manual
-  → C4: register('campo', { required }) faz tudo isso
+  → C4: useQuery() does all of this
+- C3: one useState per field + manual validate()
+  → C4: register('field', { required, min }) does all of this
 
-"Essas libs existem para resolver problemas que você já sentiu."
+"These libraries exist because you were writing the same thing repeatedly."
 
-## 🔗 Spec completo
+## 🔗 Full Spec
 tools/specs/SPEC-005-edit-transaction-page.md
 ```
 
@@ -54,26 +54,26 @@ tools/specs/SPEC-005-edit-transaction-page.md
 ## Subtasks
 
 ```
-1. Instalar @tanstack/react-query e react-hook-form
-2. Criar app/providers.tsx com QueryClientProvider
-3. Envolver app/layout.tsx com <Providers>
-4. Implementar transactionService.getById(id) e update(id, data)
-5. Criar app/transactions/[id]/edit/page.tsx com useQuery
-6. Integrar useForm com reset() para pré-preencher o formulário
-7. Implementar useMutation para o PUT com invalidateQueries no onSuccess
-8. Conectar botão "Editar" na lista — navegar para /transactions/{id}/edit
+1. Install @tanstack/react-query and react-hook-form
+2. Create app/providers.tsx with QueryClientProvider
+3. Wrap app/layout.tsx with <Providers>
+4. Implement transactionService.getById(id) and update(id, data)
+5. Create app/transactions/[id]/edit/page.tsx with useQuery
+6. Integrate useForm with reset() to pre-populate form fields
+7. Implement useMutation for PUT with invalidateQueries on onSuccess
+8. Connect "Edit" button on list page — navigate to /transactions/{id}/edit
 ```
 
 ---
 
-## Campos do card
+## Card Fields
 
-| Campo | Valor |
+| Field | Value |
 |-------|-------|
-| Projeto | PocketFinance |
-| Épico | C — Frontend |
-| Prioridade | High |
-| Estimativa | 4h |
+| Project | PocketFinance |
+| Epic | C — Frontend |
+| Priority | High |
+| Estimate | 4h |
 | Tags | `frontend`, `react-query`, `react-hook-form`, `put` |
 | Spec ID | SPEC-005 |
-| Depende de | C3 (SPEC-004) |
+| Depends on | C3 (SPEC-004) |

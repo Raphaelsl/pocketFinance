@@ -1,47 +1,48 @@
 # Card Asana — C3: Create Transaction Page
 
-## Nome da tarefa
+## Task Name
 ```
-[SPEC-004] C3 — Create Transaction: formulário com useState manual
+[SPEC-004] C3 — Create Transaction: useState manual + form validation
 ```
 
 ---
 
-## Descrição
+## Description
 
 ```
-## 🎯 Objetivo
+## 🎯 Objective
 
-Criar a página de criação de transação consumindo POST /api/transactions.
-Usa useState por campo e validação manual de forma intencional — para o Dev
-sentir o boilerplate antes de conhecer React Hook Form no C4.
+Create a transaction creation page consuming POST /api/transactions.
+Uses manual useState for each field and manual validation intentionally
+so Dev feels the boilerplate before knowing React Hook Form in C4.
 
-## ✅ Critérios de aceite
+## ✅ Acceptance Criteria
 
-- [ ] Formulário acessível em /transactions/new
-- [ ] Campos: amount, currency, description, occurredAt
-- [ ] Validação local antes de submeter (campo vazio, amount negativo)
-- [ ] Erro de validação exibido por campo
-- [ ] Loading durante o POST
-- [ ] Sucesso: redireciona para /transactions
-- [ ] Erro da API: exibe mensagem
-- [ ] Botão "Nova Transação" adicionado na página de listagem (C2)
-- [ ] transactionService.create() implementado
+- [ ] Form accessible at /transactions/new
+- [ ] Form fields: amount, currency, description, occurredAt
+- [ ] Local validation before submit (empty field, negative amount)
+- [ ] Validation error message displayed per field
+- [ ] Loading state while POST is in flight
+- [ ] On success: redirect to /transactions
+- [ ] On API error: display error message
+- [ ] "New Transaction" button added to list page (C2)
+- [ ] transactionService.create() implemented
 
-## 📡 Endpoint consumido
+## 📡 Endpoint consumed
 
 POST /api/transactions
-Body: { amount, currency, description, occurredAt, categoryId, metadata }
+Request: { amount, currency, description, occurredAt, categoryId?, metadata? }
+Response: 201 Created with Transaction object
 
-## 🧠 Intenção pedagógica
+## 🧠 Pedagogical Intention
 
-Usar um useState por campo para sentir:
-- boilerplate de estado por campo
-- validação manual campo a campo
-- controle manual de submitting
-(No C4 o React Hook Form resolve tudo com register())
+Use manual useState for each field to feel:
+- How many useState do I need for 4 fields? 7 total!
+- State management becomes verbose quickly
+- Validation logic is repetitive and error-prone
+(In C4 React Hook Form eliminates this boilerplate with register())
 
-## 🔗 Spec completo
+## 🔗 Full Spec
 tools/specs/SPEC-004-create-transaction-page.md
 ```
 
@@ -50,26 +51,26 @@ tools/specs/SPEC-004-create-transaction-page.md
 ## Subtasks
 
 ```
-1. Implementar transactionService.create(data)
-2. Criar app/transactions/new/page.tsx com useState por campo
-3. Implementar função validate() com regras por campo
-4. Implementar handleSubmit com loading e redirect no sucesso
-5. Exibir erros de validação por campo no formulário
-6. Exibir erro da API quando POST falhar
-7. Adicionar botão "Nova Transação" na listagem (link para /transactions/new)
-8. Testar fluxo completo — transação aparece na lista após criação
+1. Implement transactionService.create(data)
+2. Create app/transactions/new/page.tsx with useState for each field
+3. Implement validate() function with field-level validation rules
+4. Implement handleSubmit with loading state and redirect on success
+5. Display validation errors per field in the form
+6. Display API error message when POST fails
+7. Add "New Transaction" button to list page (link to /transactions/new)
+8. Test full flow — transaction appears in list after creation
 ```
 
 ---
 
-## Campos do card
+## Card Fields
 
-| Campo | Valor |
+| Field | Value |
 |-------|-------|
-| Projeto | PocketFinance |
-| Épico | C — Frontend |
-| Prioridade | High |
-| Estimativa | 3h |
-| Tags | `frontend`, `formulário`, `post`, `validação` |
+| Project | PocketFinance |
+| Epic | C — Frontend |
+| Priority | High |
+| Estimate | 3h |
+| Tags | `frontend`, `form`, `useState`, `validation` |
 | Spec ID | SPEC-004 |
-| Depende de | C2 (SPEC-003) |
+| Depends on | C2 (SPEC-003) |

@@ -1,44 +1,44 @@
 # Card Asana — C5: Delete Transaction Flow
 
-## Nome da tarefa
+## Task Name
 ```
-[SPEC-006] C5 — Delete Transaction: modal de confirmação + useMutation
+[SPEC-006] C5 — Delete Transaction: confirmation modal + useMutation
 ```
 
 ---
 
-## Descrição
+## Description
 
 ```
-## 🎯 Objetivo
+## 🎯 Objective
 
-Implementar o fluxo de exclusão de transação com modal de confirmação,
-reutilizando o padrão useMutation já aprendido no C4.
+Implement the transaction deletion flow with confirmation modal,
+reusing the useMutation pattern already learned in C4.
 
-Foco em UX de ação destrutiva: confirmação obrigatória, loading no botão,
-feedback de erro e atualização automática da lista via cache do React Query.
+Focus on destructive action UX: mandatory confirmation, button loading state,
+error feedback, and automatic list update via React Query cache.
 
-## ✅ Critérios de aceite
+## ✅ Acceptance Criteria
 
-- [ ] Botão "Excluir" em cada item abre modal de confirmação
-- [ ] Modal exibe descrição da transação e botões Cancelar / Excluir
-- [ ] Ao confirmar: chama DELETE /api/transactions/{id}
-- [ ] Durante o DELETE: botão desabilitado com estado de loading
-- [ ] Sucesso: modal fecha e item some da lista (cache invalidado)
-- [ ] Erro: mensagem exibida dentro do modal
-- [ ] transactionService.delete() implementado
+- [ ] "Delete" button on each item opens confirmation modal
+- [ ] Modal displays transaction description and Cancel / Delete buttons
+- [ ] On confirm: calls DELETE /api/transactions/{id}
+- [ ] During DELETE: button disabled with loading state
+- [ ] On success: modal closes and item disappears from list (cache invalidated)
+- [ ] On error: error message displayed in modal
+- [ ] transactionService.delete() implemented
 
-## 📡 Endpoint consumido
+## 📡 Endpoint consumed
 
 DELETE /api/transactions/{id} → 204 No Content
 
-## 🧠 Spike pedagógico (TL aplica antes de fechar o card)
+## 🧠 Pedagogical Spike (TL applies before closing card)
 
-"Perceba que useMutation + invalidateQueries é o mesmo padrão do C4.
-Uma vez que você aprende o padrão, ele se repete — DELETE, POST, PUT,
-todos seguem a mesma estrutura."
+"Notice that useMutation + invalidateQueries is the same pattern as C4.
+Once you learn the pattern, it repeats — DELETE, POST, PUT, GET,
+they all follow the same structure. That's by design."
 
-## 🔗 Spec completo
+## 🔗 Full Spec
 tools/specs/SPEC-006-delete-transaction-flow.md
 ```
 
@@ -47,25 +47,25 @@ tools/specs/SPEC-006-delete-transaction-flow.md
 ## Subtasks
 
 ```
-1. Implementar transactionService.delete(id)
-2. Criar components/ConfirmDeleteModal.tsx
-3. Adicionar useMutation na página de listagem para o DELETE
-4. Conectar botão "Excluir" no TransactionItem — abrir modal com id e descrição
-5. Implementar loading no botão do modal durante DELETE
-6. Implementar tratamento de erro dentro do modal
-7. Testar fluxo completo — item some da lista após confirmação
+1. Implement transactionService.delete(id)
+2. Create components/ConfirmDeleteModal.tsx
+3. Add useMutation to list page for DELETE operation
+4. Connect "Delete" button in TransactionItem — open modal with id and description
+5. Implement loading state on modal button during DELETE
+6. Implement error handling inside modal
+7. Test full flow — item disappears from list after confirmation
 ```
 
 ---
 
-## Campos do card
+## Card Fields
 
-| Campo | Valor |
+| Field | Value |
 |-------|-------|
-| Projeto | PocketFinance |
-| Épico | C — Frontend |
-| Prioridade | Medium |
-| Estimativa | 2h |
+| Project | PocketFinance |
+| Epic | C — Frontend |
+| Priority | Medium |
+| Estimate | 2h |
 | Tags | `frontend`, `delete`, `modal`, `ux` |
 | Spec ID | SPEC-006 |
-| Depende de | C4 (SPEC-005) |
+| Depends on | C4 (SPEC-005) |
