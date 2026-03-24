@@ -3,13 +3,15 @@ interface Props{
     transaction: Transaction;// exige obrigatoriamente um obj Transaction
 }
 export default function TransactionItem({transaction}: Props){
+
+    const dataFormatada = `${new Date(transaction.occurredAt).toLocaleDateString('pt-BR')} ${new Date(transaction.occurredAt).toLocaleTimeString('pt-BR')}`;
     //extraindo o obj diretamente dos args da function
     return(
         <div className="flex justify-between items-center p-4 border-b">
             <div>
                 <p className="font-bold">{transaction.description}</p>
                 <p className="text-sm text-gray-500">
-                    {new Date(transaction.occurredAt).toLocaleDateString('pt-BR')}
+                    <span>{dataFormatada}</span>
                 </p>
             </div>
             <div className="text-right">
