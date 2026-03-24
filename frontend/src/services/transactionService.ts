@@ -1,13 +1,12 @@
 import { PagedResponse, Transaction, TransactionCreateRequest, TransactionUpdateRequest } from '@/types/transaction'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/transactions';
 
 export const transactionService = {
   list: async (page = 0, size = 10): Promise<PagedResponse<Transaction>> => {
     const response =  await fetch(`${API_URL}?page=${page}&size=${size}`);
     //async: promessa de entrega
     //await : espera o resultado
-
     if(!response.ok){
       throw new Error("Erro ao carregar a Transação");
     }
