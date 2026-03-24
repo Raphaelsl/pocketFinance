@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public record TransactionCreateRequest(
         @NotNull(message = "Amount is required")
-        @Positive(message = "Amount must be positive")
+
         BigDecimal amount,
 
         @NotBlank(message = "Currency is required")
