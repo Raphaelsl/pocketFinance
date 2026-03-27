@@ -1,92 +1,70 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Transaction } from '@/types/transaction';
-import {transactionService} from "@/services/transactionService";
+import {useState} from 'react';
 import TransactionItem from '@/components/TransactionItem';
 import Button from "@/components/Button";
-
+import {useTransactions} from "@/hooks/useTransactions";
 
 
 export default function TransactionsPage() {
 
-    //UserStates
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+    // A tela só controla em qual página estamos
     const [page, setPage] = useState<number>(0);
 
-    useEffect(() => {
-        //func assincrona interna
-        const fetchTransactions = async () => {
-            try {
-                // Avisa a tela que começou a buscar e limpa erros antigos
-                setLoading(true);
-                setError(null);
+    // Puxa os dados Custom Hook
+    const {transactions, loading, error, totalPages} = useTransactions(page);
+    const hasNextPage = page < totalPages - 1;
 
-                //Chama o Service
-                const response = await transactionService.list(page, 10);
+    // ==========================================
+    // EARLY RETURNS
+    // ==========================================
+    if (loading) {
+        return <p className="p-10 text-center text-gray-400 font-bold mt-20">Carregando transações...</p>;
+    }
 
-                // guardando a lista no estado
-                setTransactions(response.content);
+    if (error) {
+        return <p className="p-10 text-center text-red-500 font-bold mt-20">{error}</p>;
+    }
 
-            } catch (err) {
-                //Qualquer erro(ate quando estiver desligado)
-                setError('Não foi possível carregar as transações.');
-                console.error(err);
-
-            } finally {
-                //fim do carregamento(de qlqr forma)
-                setLoading(false);
-            }
-        };
-        // chamada normal
-        fetchTransactions();
-
-    }, [page]);
-
+    // ==========================================
+    // RENDER PRINCIPAL
+    // ==========================================
     return (
         <main className="container mx-auto p-6 max-w-3xl">
             <h1 className="text-2xl font-bold mb-6">Minhas Transações</h1>
-            {/* Forçando o Tailwind a compilar essas cores: bg-blue-600 hover:bg-blue-700 bg-gray-300 text-gray-700 text-white */}
 
             <div className="bg-white border rounded-xl shadow-sm overflow-hidden">
                 <div className="flex flex-col divide-y">
-                    {/* 3. Percorremos a lista e renderizamos o componente criado na Subtask 2 */}
-                    {transactions.map((t) => (
-                        <TransactionItem key={t.id} transaction={t} />
-                    ))}
-                    {/* A barra de paginação agora é 100% React nativo! */}
-                    <div className="p-4 flex justify-between items-center bg-gray-50 border-t mt-4">
 
+                    {transactions.map((t) => (
+                        <TransactionItem key={t.id} transaction={t}/>
+                    ))}
+
+                    {transactions.length === 0 && (
+                        <p className="p-10 text-center text-gray-500">Nenhuma transação encontrada nesta página.</p>
+                    )}
+
+                    {/* Barra de paginação */}
+                    <div className="p-4 flex justify-between items-center bg-gray-50 border-t mt-4">
                         <Button
                             text="Anterior"
                             onClick={() => setPage(page - 1)}
-                            disabled={page === 0 || loading}
+                            disabled={page === 0}
                         />
 
                         <span className="text-sm text-gray-600 font-medium">
-                            Página {page + 1}
+                            Página {page + 1} de {totalPages || 1}
                         </span>
 
                         <Button
                             text="Próxima"
-                            // A lógica limpa: se não tem 10 itens, desabilita. Se tentar clicar, o próprio React+HTML bloqueia.
                             onClick={() => setPage(page + 1)}
-                            disabled={loading || transactions.length < 10}
+                            disabled={!hasNextPage}
                         />
-
                     </div>
 
-
-                    {transactions.length === 0 && !loading && (
-                        <p className="p-10 text-center text-gray-500">Nenhuma transação encontrada.</p>
-                    )}
                 </div>
             </div>
-
-
         </main>
-
     );
 }
