@@ -9,7 +9,10 @@ export default function TransactionItem({transaction}: Props){
     return(
         <div className="flex justify-between items-center p-4 border-b">
             <div>
-                <p className="font-bold">{transaction.description}</p>
+                {/*
+                    description
+                */}
+                <p className="font-bold text-gray-500">{transaction.description}</p>
                 <p className="text-sm text-gray-500">
                     <span>{dataFormatada}</span>
                 </p>
