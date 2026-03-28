@@ -112,6 +112,24 @@ Cada card resolve um problema que o card anterior deixa em evidência. Isso cria
 
 ## 🎓 Spikes Pedagógicos (Sessões com TL)
 
+### Spike 0 — Frontend Architecture & Structure (ANTES DE C1)
+**Quando:** Antes de SPEC-002 (mesmo antes, se possível)
+**Duração:** 45min
+**Documento:** `SPIKE-STRUCTURE-FRONTEND.md`
+
+**O que fazer:**
+- Tour pelas pastas: `app/`, `components/`, `services/`, `types/`
+- Explicar por quê cada pasta existe
+- Rastrear fluxo de dados: Browser → page.tsx → service → API → back → response
+- Convenções: naming, imports com `@/`, estrutura de arquivos
+- Exercício: "Rastrear uma requisição" no DevTools
+
+**Resultado:** Dev entende arquitetura antes de codificar nada.
+
+---
+
+### Spikes Individuais (por Card)
+
 Cada spike é **ao vivo no código**, focando em "ver funcionando" antes de teoria.
 
 ### Spike 1 — React Basics (Duração: 30min)
