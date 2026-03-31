@@ -20,7 +20,11 @@ export const transactionService = {
 
   create: async (data: TransactionCreateRequest): Promise<Transaction> => {
     // Implementado em SPEC-004 (C3)
-    throw new Error('Not implemented')
+    const response = await fetch(API_URL, {method: 'POST', headers: {'Contet-Type':'application/json' }, body: JSON.stringify(data)});
+    if(!response.ok){
+      throw new Error("Erro ao criar a Transação");
+    }
+    return response.json();
   },
 
   update: async (id: string, data: TransactionUpdateRequest): Promise<Transaction> => {
