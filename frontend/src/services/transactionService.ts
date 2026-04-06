@@ -20,7 +20,7 @@ export const transactionService = {
 
   create: async (data: TransactionCreateRequest): Promise<Transaction> => {
     // Implementado em SPEC-004 (C3)
-    const response = await fetch(API_URL, {method: 'POST', headers: {'Contet-Type':'application/json' }, body: JSON.stringify(data)});
+    const response = await fetch(API_URL, {method: 'POST', headers: {'Content-Type':'application/json' }, body: JSON.stringify(data)});
     if(!response.ok){
       throw new Error("Erro ao criar a Transação");
     }
