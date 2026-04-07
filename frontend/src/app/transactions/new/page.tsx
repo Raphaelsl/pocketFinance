@@ -1,15 +1,60 @@
 'use client';
+
+
+import {useState} from "react";
+import {useRouter} from "next/navigation";
+import { transactionService } from "@/services/transactionService";
+
 type FormErrors = {
     amount: string;
     currency: string;
     description: string;
     occurredAt: string;
 };
+type FormValues = {
+    amount: number;
+    currency: string;
+    description: string;
+    occurredAt: string;
+};
+type ValidationRule = (values: FormValues) => string;
+type ValidationSchema = {
+    [K in keyof FormValues]: ValidationRule[];
+};
 
-import {useState} from "react";
-import {useRouter} from "next/navigation";
-import { transactionService } from "@/services/transactionService";
 
+const validationSchema: ValidationSchema = {
+    amount: [
+        (values) => (values.amount <= 0 ? "Valor deve ser maior que zero" : ""),
+    ],
+    currency: [
+        (values) => (!values.currency.trim() ? "Moeda obrigatoria" : ""),
+    ],
+    description: [
+        (values) => (!values.description.trim() ? "Descricao obrigatoria" : ""),
+    ],
+    occurredAt: [
+        (values) => (!values.occurredAt.trim() ? "Data obrigatoria" : ""),
+    ],
+};
+function validateForm(values: FormValues, schema: ValidationSchema): FormErrors {
+    const fields = Object.keys(schema) as (keyof FormValues)[];
+    const errors = {} as FormErrors;
+
+    for (const field of fields) {
+        const rules = schema[field];
+        let message = "";
+
+        for (const rule of rules) {
+            message = rule(values);
+            if (message) break;
+        }
+
+        errors[field] = message;
+    }
+
+    return errors;
+}
 
 export default function NewTransactionsPage() {
     const router = useRouter();
@@ -18,36 +63,26 @@ export default function NewTransactionsPage() {
     const [currency, setCurrency] = useState<string>('BRL');
     const [description, setDescription] = useState<string>('');
     const [occurredAt, setOccurredAt] = useState<string>('');
-    const [errors, setErrors] = useState({amount: '', currency: '', description: '', occurredAt: ''});
+    const [errors, setErrors] = useState<FormErrors>({
+        amount: "",
+        currency: "",
+        description: "",
+        occurredAt: "",
+    });
     const [loading, setLoading] = useState<boolean>(false);
     const [apiError, setApiError] = useState<string>('');
+
+
+
+
     const validate = (): boolean => {
-        const newErrors: FormErrors = {
-            amount: "",
-            currency: "",
-            description: "",
-            occurredAt: "",
-        };
-        // amount
-        if (amount <= 0) {
-            newErrors.amount = "Valor deve ser maior que zero";
-        }
-        // currency
-        if (!currency.trim()) {
-            newErrors.currency = "Moeda obrigatoria";
-        }
-        // description
-        if (!description.trim()) {
-            newErrors.description = "Descricao obrigatoria";
-        }
-        // occurredAt
-        if (!occurredAt.trim()) {
-            newErrors.occurredAt = "Data obrigatoria";
-        }
+        const values: FormValues = { amount, currency, description, occurredAt };
+        const newErrors = validateForm(values, validationSchema);
+
         setErrors(newErrors);
-        // se TODAS mensagens forem "", está válido
         return Object.values(newErrors).every((msg) => msg === "");
     };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setApiError("");
