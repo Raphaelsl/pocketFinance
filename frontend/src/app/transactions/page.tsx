@@ -4,6 +4,8 @@ import {useState} from 'react';
 import TransactionItem from '@/components/TransactionItem';
 import Button from "@/components/Button";
 import {useTransactions} from "@/hooks/useTransactions";
+import Link from "next/link";
+
 
 
 export default function TransactionsPage() {
@@ -43,6 +45,16 @@ export default function TransactionsPage() {
                     {transactions.length === 0 && (
                         <p className="p-10 text-center text-gray-500">Nenhuma transação encontrada nesta página.</p>
                     )}
+                    <div className="flex items-center justify-between mb-6">
+                        <h1 className="text-2xl font-bold">Minhas Transações</h1>
+
+                        <Link
+                            href="/transactions/new"
+                            className="px-4 py-2 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700"
+                        >
+                            New Transaction
+                        </Link>
+                    </div>
 
                     {/* Barra de paginação */}
                     <div className="p-4 flex justify-between items-center bg-gray-50 border-t mt-4">
