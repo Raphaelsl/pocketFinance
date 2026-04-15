@@ -9,8 +9,9 @@
 | **Status** | Draft |
 | **Tipo** | Feature |
 | **Prioridade** | High |
-| **Estimativa** | 4h |
+| **Estimativa** | 4h + 1h (integração tipo) = 5h |
 | **Depende de** | SPEC-004 (Create Page) |
+| **Bloqueado por** | **SPEC-TRANSACTION-TYPES** (prerequisito: tipo deve estar no backend antes) |
 
 ---
 
@@ -34,8 +35,9 @@ Permitir editar uma transação existente usando `GET /api/transactions/{id}` e 
 - `queryClient.invalidateQueries()` para sincronizar cache
 - `useForm()` + `register()` do React Hook Form
 - Validação declarativa com `register({ required, min, etc })`
-- Pre-população de form com `reset()`
-- Padrão: `useQuery` + `useMutation` + form setup
+- Pre-população de form com `reset()` (inclusive enums)
+- Select com enum (INCOME/EXPENSE) — como renderizar choices
+- Padrão: `useQuery` + `useMutation` + form setup + pré-preenchimento
 
 **Insight após comparar com C2/C3:**
 > "Espera... em C2 eu tinha 4 useState + useEffect. Aqui é só 1 useQuery!
@@ -57,6 +59,10 @@ Permitir editar uma transação existente usando `GET /api/transactions/{id}` e 
 - [ ] Em erro: exibe mensagem
 - [ ] Botão "Editar" na lista (C2) agora navega para `/transactions/{id}/edit`
 - [ ] `transactionService.getById()` e `transactionService.update()` implementados
+- [ ] **NEW:** Campo `type` (INCOME/EXPENSE) renderiza como select no formulário
+- [ ] **NEW:** Type é pré-preenchido com valor atual da transação
+- [ ] **NEW:** Update enviado com type (não pode mudar sem atualizar)
+- [ ] **Prerequisito:** SPEC-TRANSACTION-TYPES concluído (tipo deve existir no backend)
 
 ---
 
@@ -143,6 +149,7 @@ export default function EditTransactionPage() {
     if (transaction) {
       reset({
         amount: transaction.amount,
+        type: transaction.type,  // <-- NEW: pré-preenchimento de tipo
         currency: transaction.currency,
         description: transaction.description,
         occurredAt: transaction.occurredAt.slice(0, 16), // para input datetime-local
@@ -168,6 +175,16 @@ export default function EditTransactionPage() {
   return (
     <form onSubmit={handleSubmit((data) => mutation.mutate(data))}>
       <h1>Editar Transação</h1>
+
+      <div>
+        <label>Tipo</label>
+        <select {...register('type', { required: 'Obrigatório' })}>
+          <option value="">Selecione...</option>
+          <option value="INCOME">💰 Receita</option>
+          <option value="EXPENSE">💸 Despesa</option>
+        </select>
+        {errors.type && <span className="text-red-500">{errors.type.message}</span>}
+      </div>
 
       <div>
         <label>Valor</label>
@@ -223,12 +240,14 @@ export default function EditTransactionPage() {
 |---|------|----------|
 | 1 | Instalar `@tanstack/react-query` e `react-hook-form` | `npm install` sem erros |
 | 2 | Criar `app/providers.tsx` e adicionar no `layout.tsx` | App sobe sem erro |
-| 3 | Implementar `transactionService.getById()` e `update()` | Funções tipadas |
+| 3 | Implementar `transactionService.getById()` e `update()` | Funções tipadas (com `type`) |
 | 4 | Criar página `[id]/edit/page.tsx` com `useQuery` | Dados carregam do backend |
-| 5 | Integrar `useForm` com `reset()` para pré-preencher | Form exibe dados da transação |
-| 6 | Implementar `useMutation` para o PUT | Submit atualiza no backend |
-| 7 | Invalidar cache e redirecionar no `onSuccess` | Lista atualiza após edição |
-| 8 | Conectar botão "Editar" na lista | Navegação funciona |
+| 5 | Integrar `useForm` com `reset()` para pré-preencher | Form exibe dados + type |
+| 6 | **NEW:** Adicionar select de tipo (INCOME/EXPENSE) no form | Select renderiza e valida |
+| 7 | Implementar `useMutation` para o PUT | Submit atualiza com type |
+| 8 | Invalidar cache e redirecionar no `onSuccess` | Lista atualiza após edição |
+| 9 | Conectar botão "Editar" na lista | Navegação funciona |
+| 10 | **NEW:** Testar edição: change type e verificar persist | Type muda no banco |
 
 ---
 
