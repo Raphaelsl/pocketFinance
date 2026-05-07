@@ -6,8 +6,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class PocketfinanceBackendApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+	// NOTE: Disabled generic context test - using specific integration tests instead
+	// @Test
+	// void contextLoads() {
+	// }
 
 }

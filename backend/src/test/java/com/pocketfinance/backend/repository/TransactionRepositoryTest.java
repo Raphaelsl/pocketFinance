@@ -361,4 +361,4 @@ class TransactionRepositoryTest {
     /**
      * Helper method to extract UUID from JSON response
      */
-
+}
