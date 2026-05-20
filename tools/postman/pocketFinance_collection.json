@@ -40,7 +40,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"amount\": 150.50,\n  \"currency\": \"BRL\",\n  \"description\": \"Compra no mercado\",\n  \"occurredAt\": \"2024-03-03T10:30:00Z\",\n  \"categoryId\": null,\n  \"metadata\": null\n}",
+              "raw": "{\n  \"type\": \"EXPENSE\",\n  \"amount\": 150.50,\n  \"currency\": \"BRL\",\n  \"description\": \"Compra no mercado\",\n  \"occurredAt\": \"2024-03-03T10:30:00Z\",\n  \"categoryId\": null,\n  \"metadata\": null\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -57,6 +57,34 @@
           "response": []
         },
         {
+          "name": "POST - Create Transaction (INCOME)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"INCOME\",\n  \"amount\": 5000.00,\n  \"currency\": \"BRL\",\n  \"description\": \"Salario mensal\",\n  \"occurredAt\": \"2024-03-05T09:00:00Z\",\n  \"categoryId\": null,\n  \"metadata\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/transactions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "transactions"]
+            },
+            "description": "Creates a new INCOME transaction. Returns 201 Created with Location header pointing to the new resource."
+          },
+          "response": []
+        },
+        {
           "name": "POST - Create Transaction (invalid - validation test)",
           "request": {
             "method": "POST",
@@ -68,7 +96,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"amount\": -50.00,\n  \"currency\": \"\",\n  \"description\": \"\",\n  \"occurredAt\": null,\n  \"categoryId\": null,\n  \"metadata\": null\n}",
+              "raw": "{\n  \"type\": \"EXPENSE\",\n  \"amount\": -50.00,\n  \"currency\": \"\",\n  \"description\": \"\",\n  \"occurredAt\": null,\n  \"categoryId\": null,\n  \"metadata\": null\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -276,7 +304,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"amount\": 200.00,\n  \"currency\": \"BRL\",\n  \"description\": \"Compra atualizada no mercado\",\n  \"occurredAt\": \"2024-03-03T10:30:00Z\",\n  \"categoryId\": null,\n  \"metadata\": null\n}",
+              "raw": "{\n  \"type\": \"INCOME\",\n  \"amount\": 200.00,\n  \"currency\": \"BRL\",\n  \"description\": \"Compra atualizada no mercado\",\n  \"occurredAt\": \"2024-03-03T10:30:00Z\",\n  \"categoryId\": null,\n  \"metadata\": null\n}",
               "options": {
                 "raw": {
                   "language": "json"

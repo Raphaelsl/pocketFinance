@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -21,7 +22,8 @@ import java.util.regex.Pattern;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DisplayName("Transaction Integration Tests - SKIPPED (Awaiting B5 Context Resolution)")
+@ActiveProfiles("test")
+@DisplayName("Transaction Integration Tests")
 class TransactionIntegrationTest {
 
     @LocalServerPort
@@ -37,8 +39,7 @@ class TransactionIntegrationTest {
         baseUrl = "http://localhost:" + port + "/api/transactions";
     }
 
-    // SKIPPED: All integration tests commented - context loading issue being resolved
-    // Re-enable after TASK-B5 complete
+    // Integration tests use the H2 test profile.
     @DisplayName("Should create a valid transaction successfully")
     void shouldCreateValidTransaction() {
         // Arrange
@@ -150,6 +151,7 @@ class TransactionIntegrationTest {
         // Usamos o doesNotContain para ter certeza absoluta de que não vazou implementação.
         assertThat(response.getBody()).doesNotContain("\"pageable\":");
         assertThat(response.getBody()).doesNotContain("\"sort\":");
+        assertThat(response.getBody()).contains("\"type\"");
     }
 
     @Test
@@ -192,6 +194,7 @@ class TransactionIntegrationTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody()).contains("100.00");
         assertThat(response.getBody()).contains("Lanche");
+        assertThat(response.getBody()).contains("\"type\":\"EXPENSE\"");
     }
 
     @Test
@@ -223,7 +226,7 @@ class TransactionIntegrationTest {
 
         // Update the transaction
         TransactionUpdateRequest updateRequest = new TransactionUpdateRequest(
-                TransactionType.EXPENSE,  // NEW: add type
+                TransactionType.INCOME,  // NEW: switch type to verify update
                 new BigDecimal("75.00"),
                 "BRL",
                 "Café e bolo",
@@ -247,6 +250,7 @@ class TransactionIntegrationTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody()).contains("75.00");
         assertThat(response.getBody()).contains("Café e bolo");
+        assertThat(response.getBody()).contains("\"type\":\"INCOME\"");
     }
 
     @Test
