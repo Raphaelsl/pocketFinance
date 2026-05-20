@@ -11,8 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-
 import java.time.Instant;
 import java.util.UUID;
 
@@ -31,7 +29,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/transactions")
-@CrossOrigin(origins = "http://localhost:3000")
 public class TransactionController {
 
     private final TransactionService transactionService;
