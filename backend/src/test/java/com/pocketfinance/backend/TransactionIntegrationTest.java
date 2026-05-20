@@ -40,6 +40,7 @@ class TransactionIntegrationTest {
     }
 
     // Integration tests use the H2 test profile.
+    @Test
     @DisplayName("Should create a valid transaction successfully")
     void shouldCreateValidTransaction() {
         // Arrange
