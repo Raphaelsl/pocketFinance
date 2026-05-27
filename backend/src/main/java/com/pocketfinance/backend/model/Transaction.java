@@ -39,13 +39,17 @@ public class Transaction {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private TransactionType type;
+
     // Default constructor required by JPA
     public Transaction() {
     }
 
     // Full constructor
     public Transaction(UUID id, BigDecimal amount, String currency, String description, Instant occurredAt,
-                        Category category, String metadata, Instant createdAt, Instant updatedAt) {
+                        Category category, String metadata, Instant createdAt, Instant updatedAt,TransactionType type ) {
         this.id = id;
         this.amount = amount;
         this.currency = currency;
@@ -55,6 +59,7 @@ public class Transaction {
         this.metadata = metadata;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.type = type;
     }
 
     // Getters
@@ -129,5 +134,13 @@ public class Transaction {
 
     public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public TransactionType getType() {
+        return type;
+    }
+
+    public void setType(TransactionType type) {
+        this.type = type;
     }
 }

@@ -2,6 +2,7 @@ package com.pocketfinance.backend.repository;
 
 import com.pocketfinance.backend.model.Category;
 import com.pocketfinance.backend.model.Transaction;
+import com.pocketfinance.backend.model.TransactionType;
 import com.pocketfinance.backend.specification.TransactionSpecification;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,7 +65,8 @@ class TransactionRepositoryTest {
                 category1,
                 "{\"type\": \"restaurant\"}",
                 baseTime,
-                baseTime
+                baseTime,
+                TransactionType.EXPENSE  // NEW: add type
         );
 
         transaction2 = new Transaction(
@@ -76,7 +78,8 @@ class TransactionRepositoryTest {
                 category2,
                 "{\"type\": \"transport\"}",
                 baseTime.plusSeconds(3600),
-                baseTime.plusSeconds(3600)
+                baseTime.plusSeconds(3600),
+                TransactionType.EXPENSE  // NEW: add type
         );
 
         transaction3 = new Transaction(
@@ -88,7 +91,8 @@ class TransactionRepositoryTest {
                 category1,
                 "{\"type\": \"grocery\"}",
                 baseTime.plusSeconds(7200),
-                baseTime.plusSeconds(7200)
+                baseTime.plusSeconds(7200),
+                TransactionType.EXPENSE  // NEW: add type
         );
     }
 
@@ -248,4 +252,113 @@ class TransactionRepositoryTest {
         assertEquals(1, result.getContent().size());
         assertEquals("Grocery shopping", result.getContent().get(0).getDescription());
     }
+
+    @Test
+    void whenTransactionCreatedWithType_thenTypeIsNotNull() {
+        // Arrange & Act
+        assertNotNull(transaction1.getType(), "Transaction type should not be null");
+        assertNotNull(transaction2.getType(), "Transaction type should not be null");
+        assertNotNull(transaction3.getType(), "Transaction type should not be null");
+    }
+
+    @Test
+    void whenTransactionHasTypeExpense_thenTypeEqualsExpense() {
+        // Arrange & Act
+        assertEquals(TransactionType.EXPENSE, transaction1.getType(),
+                "Transaction1 should have EXPENSE type");
+        assertEquals(TransactionType.EXPENSE, transaction2.getType(),
+                "Transaction2 should have EXPENSE type");
+        assertEquals(TransactionType.EXPENSE, transaction3.getType(),
+                "Transaction3 should have EXPENSE type");
+    }
+
+    @Test
+    void whenCreatingIncomeTransaction_thenTypeEqualsIncome() {
+        // Arrange
+        UUID incomeTransactionId = UUID.randomUUID();
+        Transaction incomeTransaction = new Transaction(
+                incomeTransactionId,
+                new BigDecimal("5000.00"),
+                "USD",
+                "Monthly salary",
+                Instant.now(),
+                null,
+                null,
+                Instant.now(),
+                Instant.now(),
+                TransactionType.INCOME  // INCOME type
+        );
+
+        // Act & Assert
+        assertEquals(TransactionType.INCOME, incomeTransaction.getType(),
+                "Income transaction should have INCOME type");
+        assertNotEquals(TransactionType.EXPENSE, incomeTransaction.getType(),
+                "Income transaction should not have EXPENSE type");
+    }
+
+    @Test
+    void whenCreatingExpenseTransaction_thenTypeEqualsExpense() {
+        // Arrange
+        UUID expenseTransactionId = UUID.randomUUID();
+        Transaction expenseTransaction = new Transaction(
+                expenseTransactionId,
+                new BigDecimal("50.00"),
+                "USD",
+                "Grocery shopping",
+                Instant.now(),
+                null,
+                null,
+                Instant.now(),
+                Instant.now(),
+                TransactionType.EXPENSE  // EXPENSE type
+        );
+
+        // Act & Assert
+        assertEquals(TransactionType.EXPENSE, expenseTransaction.getType(),
+                "Expense transaction should have EXPENSE type");
+        assertNotEquals(TransactionType.INCOME, expenseTransaction.getType(),
+                "Expense transaction should not have INCOME type");
+    }
+
+    @Test
+    void whenUpdatingTransactionType_thenTypeIsUpdated() {
+        // Arrange
+        Transaction updateableTransaction = new Transaction(
+                UUID.randomUUID(),
+                new BigDecimal("100.00"),
+                "BRL",
+                "Test",
+                Instant.now(),
+                null,
+                null,
+                Instant.now(),
+                Instant.now(),
+                TransactionType.EXPENSE
+        );
+        assertEquals(TransactionType.EXPENSE, updateableTransaction.getType());
+
+        // Act - update type
+        updateableTransaction.setType(TransactionType.INCOME);
+
+        // Assert
+        assertEquals(TransactionType.INCOME, updateableTransaction.getType(),
+                "Transaction type should be updated to INCOME after setType()");
+        assertNotEquals(TransactionType.EXPENSE, updateableTransaction.getType(),
+                "Transaction type should no longer be EXPENSE");
+    }
+
+    @Test
+    void whenGettingTransactionType_thenTypeEnumValueIsCorrect() {
+        // Arrange & Act
+        TransactionType type1 = transaction1.getType();
+        TransactionType type2 = TransactionType.EXPENSE;
+
+        // Assert
+        assertEquals(type1, type2, "Transaction type should match EXPENSE enum value");
+        assertEquals("EXPENSE", type1.toString(), "TransactionType.EXPENSE should have string value EXPENSE");
+    }
+
+    /**
+     * Helper method to extract UUID from JSON response
+     */
 }

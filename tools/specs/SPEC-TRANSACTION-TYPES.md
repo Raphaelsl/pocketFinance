@@ -1,353 +1,278 @@
-# SPEC-TRANSACTION-TYPES — Add Income/Expense Type Field
+# SPEC-001: Add Transaction Types (INCOME/EXPENSE)
 
-## Metadata
-
-| Campo | Valor |
-|-------|-------|
-| **ID** | SPEC-TRANSACTION-TYPES |
-| **Épico** | B+ — Backend Enhancement (Prerequisito para Épico C) |
-| **Status** | Draft |
-| **Tipo** | Schema Change |
-| **Prioridade** | High |
-| **Estimativa** | 2h |
-| **Depende de** | Épico B concluído |
-| **Bloqueado por** | Nada |
-| **Bloqueia** | SPEC-002 (C1 Setup) — recomendado fazer isso antes do frontend |
+**Status:** Ready for Planning  
+**Spec ID:** SPEC-TRANSACTION-TYPES  
+**Priority:** High | **Estimate:** 3h  
+**Blocks:** SPEC-005 (Edit Transaction) | **Depends on:** Backend CRUD (Epic B) complete
 
 ---
 
-## 1. Overview
+## 📋 Overview
 
-O sistema atual aceita **apenas transações positivas** (validação `@Positive` no backend). Para um verdadeiro controle financeiro pessoal, precisamos diferenciar:
-- **INCOME** — Receitas, salários, depósitos, ganhos
-- **EXPENSE** — Despesas, gastos, compras, devoluções
+Currently, `pocketFinance` only accepts positive amounts via `@Positive` validation, making it impossible to differentiate between revenue (INCOME) and expenses (EXPENSE). This spec adds semantic transaction types across the full stack: backend model, migrations, DTOs, frontend types, form inputs, and UI rendering.
 
-Esta SPEC adiciona um campo `type: TransactionType` ao modelo Transaction, permitindo diferenciar fluxos de caixa e preparar o Dashboard (Épico D) para calcular saldo real.
-
----
-
-## 2. Goal
-
-Adicionar suporte a transações de dois tipos (receita e despesa), mantendo backward compatibility onde possível, e preparar o modelo de dados para aggregations no Dashboard.
+After this change, the system can:
+- Register both INCOME (salary, deposits, refunds) and EXPENSE (purchases, spending, transfers)
+- Calculate real financial balance: `totalIncome - totalExpenses`
+- Assign semantic meaning to every transaction
+- Frontend can style transactions by type (not by negative amounts)
 
 ---
 
-## 2.5 Conceitos Ensinados
+## 🎯 Objectives
 
-**O Dev aprenderá:**
-- Enums em Java + JPA
-- Migrations (Flyway) — ALTER TABLE + ADD COLUMN
-- Impacto de mudança de schema em DTOs
-- Validação condicional (nem sempre amount > 0)
-- Filtering por tipo (queries no Dashboard)
-
-**Problema resolvido:**
-- ✅ Pode registrar gastos (não só receitas)
-- ✅ Dashboard consegue calcular: saldo = receitas - despesas
-- ✅ Queries podem filtrar/agrupar por tipo
+1. **Add Transaction.type field** to the backend model (Enum: INCOME | EXPENSE)
+2. **Migrate existing data** safely — all historical transactions default to EXPENSE (conservative)
+3. **Update all DTOs** to include type (TransactionCreateRequest, TransactionUpdateRequest, TransactionDTO)
+4. **Update frontend types and components** — form field, service layer, display logic
+5. **Maintain validation** — amounts remain `@Positive` (always positive, regardless of type)
+6. **Verify end-to-end** — manual tests in Postman with both INCOME and EXPENSE transactions
 
 ---
 
-## 3. Acceptance Criteria
+## ✅ Acceptance Criteria
 
-### Backend
-- [ ] Enum `TransactionType` criado (INCOME, EXPENSE)
-- [ ] Entity `Transaction` adiciona campo `type`
-- [ ] Flyway migration criada (ADD COLUMN type)
-- [ ] `TransactionCreateRequest` atualizado com field `type`
-- [ ] `TransactionUpdateRequest` atualizado com field `type`
-- [ ] `TransactionDTO` atualizado com field `type` (resposta)
-- [ ] Validação `@Positive` mantida em `amount` (sempre positivo)
-- [ ] Dados históricos recebem `type='EXPENSE'` (default conservador)
-- [ ] Postman collection atualizada com exemplos INCOME + EXPENSE
-- [ ] Backend compila sem erros
+### Backend: Model & Database
 
-### Frontend (frontend existente não pode quebrar)
-- [ ] `types/transaction.ts` — adicionar `TransactionType` enum + campo `type` em `Transaction` e `TransactionCreateRequest`
-- [ ] `app/transactions/new/page.tsx` — adicionar `<select>` de tipo no form + estado `type` + validação
-- [ ] `services/transactionService.ts` — `create()` envia `type` no body do POST
-- [ ] `components/TransactionItem.tsx` — cor usa `transaction.type === 'EXPENSE'` em vez de `amount < 0`
+- [ ] `TransactionType` Enum created with values: `INCOME`, `EXPENSE`
+- [ ] `Transaction` Entity has new field: `type: TransactionType` (non-null)
+- [ ] Flyway migration `V003__add_transaction_type.sql` created and executes successfully
+- [ ] Migration sets `type = 'EXPENSE'` for all historical records (conservative default)
+- [ ] Migration adds CHECK constraint: `type IN ('INCOME', 'EXPENSE')`
+- [ ] Database schema change verified (no errors, no data loss)
+
+### Backend: DTOs & Mappers
+
+- [ ] `TransactionCreateRequest` DTO includes `type: TransactionType` (required field)
+- [ ] `TransactionUpdateRequest` DTO includes `type: TransactionType` (required field)
+- [ ] `TransactionDTO` (response) includes `type: TransactionType`
+- [ ] `TransactionMapper` correctly maps all three entities
+- [ ] Type field is never null in DTOs (validation enforced)
+
+### Backend: Endpoints & Validation
+
+- [ ] `POST /api/transactions` accepts `type` in request body (required)
+- [ ] `GET /api/transactions` returns `type` for each transaction
+- [ ] `PUT /api/transactions/{id}` accepts `type` in request body (required)
+- [ ] `DELETE /api/transactions/{id}` works as before (no changes needed)
+- [ ] Amount validation remains `@Positive` (always positive, independent of type)
+- [ ] Validation error on missing type: returns HTTP 400 with descriptive message
+
+### Backend: Testing
+
+- [ ] Unit test: Creating INCOME transaction succeeds
+- [ ] Unit test: Creating EXPENSE transaction succeeds
+- [ ] Unit test: Creating transaction without type fails (HTTP 400)
+- [ ] Integration test: POST with INCOME, GET returns INCOME
+- [ ] Integration test: POST with EXPENSE, GET returns EXPENSE
+- [ ] Integration test: Migration runs without errors
+- [ ] All existing tests still pass (no regression)
+
+### Frontend: Types
+
+- [ ] `types/transaction.ts`:
+  - `enum TransactionType { INCOME = 'INCOME', EXPENSE = 'EXPENSE' }`
+  - `interface Transaction` includes `type: TransactionType`
+  - `interface TransactionCreateRequest` includes `type: TransactionType`
+- [ ] Types compile without errors
+
+### Frontend: Service Layer
+
+- [ ] `services/transactionService.ts`:
+  - `create(data: TransactionCreateRequest)` sends `type` in POST body
+  - Parsed response includes `type` field
+  - No breaking changes to existing methods (GET, PUT, DELETE)
+
+### Frontend: Form & Input
+
+- [ ] `app/transactions/new/page.tsx`:
+  - Add `<select>` or `<radio>` for TransactionType (INCOME | EXPENSE)
+  - Default: EXPENSE
+  - Type selection is required (cannot submit without choosing)
+  - Form submission includes type in request body
+
+### Frontend: Display & Styling
+
+- [ ] `components/TransactionItem.tsx`:
+  - Render transaction type badge (INCOME: green/blue, EXPENSE: red)
+  - Color logic uses `transaction.type` (not `amount < 0`)
+  - Amount always displays as positive (no negative sign)
+  - Display pattern: `[Type Badge] $amount — description`
+
+### Frontend: Testing
+
+- [ ] Component test: TransactionItem renders INCOME with correct color
+- [ ] Component test: TransactionItem renders EXPENSE with correct color
+- [ ] Form test: Submitting without type shows validation error
+- [ ] Form test: Submitting with INCOME sends correct request body
+- [ ] Integration smoke test: Create INCOME, verify GET returns INCOME
+
+### Documentation & Examples
+
+- [ ] `tools/postman/pocketFinance_collection.json` updated with:
+  - POST example: creating INCOME transaction
+  - POST example: creating EXPENSE transaction
+  - GET example response showing both types
+  - PUT example: updating transaction type
+- [ ] README clarifies the change in CLI examples (if any)
+
+### Code Quality
+
+- [ ] No secrets or credentials in code
+- [ ] No console.logs or debug code left behind
+- [ ] Consistent code style (match project conventions)
+- [ ] All imports are used (no dead code)
+- [ ] Backend compiles: `./mvnw clean compile` succeeds
+- [ ] Frontend builds: `npm run build` succeeds
+- [ ] No TypeScript errors: `npx tsc --noEmit`
 
 ---
 
-## 4. Problem Statement
+## 📡 Data Model & Contracts
 
-### Atual (❌ Limitado)
-```java
-// TransactionCreateRequest.java
-@Positive  // <-- BLOQUEIA qualquer valor negativo
-BigDecimal amount
-```
-
-**Consequência:**
-- Dev não consegue criar transação de gasto (despesa)
-- Todos os registros são interpretados como "receita"
-- Dashboard não consegue calcular saldo
-
-### Proposto (✅ Flexível)
-```java
-// TransactionCreateRequest.java
-enum TransactionType {
-  INCOME,    // receita
-  EXPENSE    // despesa
-}
-
-@Positive  // amount é sempre positivo
-BigDecimal amount,
-
-@NotNull
-TransactionType type
-```
-
-**Benefício:**
-- ✅ Semanticamente clara (INCOME vs EXPENSE)
-- ✅ Amount sempre positivo (sem confusão de sinal)
-- ✅ Fácil filtrar/agrupar por tipo
-- ✅ Suporta caso de uso: "Recebi R$5000" E "Gastei R$1200"
-
----
-
-## 5. Technical Spec
-
-### 5.1 Enum (`model/TransactionType.java`)
-
-```java
-package com.pocketfinance.backend.model;
-
-public enum TransactionType {
-  INCOME,   // Receita, salário, depósito, ganho
-  EXPENSE   // Despesa, gasto, compra, serviço
-}
-```
-
-### 5.2 Entity Update (`model/Transaction.java`)
+### Entity: Transaction
 
 ```java
 @Entity
 @Table(name = "transactions")
 public class Transaction {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  private UUID id;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TransactionType type;  // NEW FIELD
 
-  @Column
-  private BigDecimal amount;
+    @Positive
+    @Column(nullable = false)
+    private BigDecimal amount;
 
-  @Column
-  @Enumerated(EnumType.STRING)  // armazena como "INCOME" ou "EXPENSE"
-  private TransactionType type;   // <-- NEW
+    @Column(nullable = false)
+    private String currency;
 
-  @Column
-  private String currency;
+    private String description;
 
-  @Column
-  private String description;
+    @Column(nullable = false)
+    private LocalDateTime occurredAt;
 
-  @Column(name = "occurred_at")
-  private Instant occurredAt;
+    private String categoryId;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "category_id")
-  private Category category;
+    private Map<String, Object> metadata;
 
-  @Column
-  private String metadata;
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 
-  @Column(name = "created_at")
-  private Instant createdAt;
+    // getters, setters, equals, hashCode
+}
 
-  @Column(name = "updated_at")
-  private Instant updatedAt;
-
-  // Getters
-  public TransactionType getType() {
-    return type;
-  }
-
-  // Setter
-  public void setType(TransactionType type) {
-    this.type = type;
-  }
-
-  // ... resto do código
+public enum TransactionType {
+    INCOME,
+    EXPENSE
 }
 ```
 
-### 5.3 Flyway Migration (`db/migration/V003__add_transaction_type.sql`)
+### API Contract: POST /api/transactions
 
-```sql
--- Add new column 'type' to transactions table
-ALTER TABLE transactions
-ADD COLUMN type VARCHAR(50) NOT NULL DEFAULT 'EXPENSE';
-
--- Create index for filtering by type
-CREATE INDEX idx_transactions_type ON transactions(type);
-```
-
-**Nota:** `DEFAULT 'EXPENSE'` é temporário — dados históricos serão marcados como EXPENSE (mais conservador).
-
-### 5.4 Request DTOs
-
-#### `TransactionCreateRequest.java`
-```java
-public record TransactionCreateRequest(
-  @NotNull(message = "Amount is required")
-  @Positive(message = "Amount must be positive")  // <-- MANTÉM @Positive
-  BigDecimal amount,
-
-  @NotNull(message = "Type is required")  // <-- NEW
-  TransactionType type,
-
-  @NotBlank(message = "Currency is required")
-  String currency,
-
-  @NotBlank(message = "Description is required")
-  String description,
-
-  @NotNull(message = "Occurred at is required")
-  Instant occurredAt,
-
-  UUID categoryId,
-
-  String metadata
-) {
+**Request:**
+```json
+{
+  "type": "INCOME",
+  "amount": 5000.00,
+  "currency": "USD",
+  "description": "Monthly salary",
+  "occurredAt": "2026-05-02T09:00:00Z",
+  "categoryId": "cat-001",
+  "metadata": { "source": "employer" }
 }
 ```
 
-#### `TransactionUpdateRequest.java`
-```java
-public record TransactionUpdateRequest(
-  @NotNull(message = "Amount is required")
-  @Positive(message = "Amount must be positive")
-  BigDecimal amount,
-
-  @NotNull(message = "Type is required")  // <-- NEW
-  TransactionType type,
-
-  @NotBlank(message = "Currency is required")
-  String currency,
-
-  @NotBlank(message = "Description is required")
-  String description,
-
-  @NotNull(message = "Occurred at is required")
-  Instant occurredAt,
-
-  UUID categoryId,
-
-  String metadata
-) {
+**Response: 201 Created**
+```json
+{
+  "id": "txn-12345",
+  "type": "INCOME",
+  "amount": 5000.00,
+  "currency": "USD",
+  "description": "Monthly salary",
+  "occurredAt": "2026-05-02T09:00:00Z",
+  "categoryId": "cat-001",
+  "metadata": { "source": "employer" },
+  "createdAt": "2026-05-02T10:30:00Z"
 }
 ```
 
-### 5.5 Response DTO
-
-#### `TransactionDTO.java`
-```java
-public record TransactionDTO(
-  UUID id,
-  BigDecimal amount,
-  TransactionType type,  // <-- NEW
-  String currency,
-  String description,
-  Instant occurredAt,
-  UUID categoryId,
-  String categoryName,
-  String metadata,
-  Instant createdAt,
-  Instant updatedAt
-) {
+**Error: 400 Bad Request (missing type)**
+```json
+{
+  "timestamp": "2026-05-02T10:30:00Z",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Field 'type' is required. Must be one of: INCOME, EXPENSE",
+  "path": "/api/transactions"
 }
 ```
 
-### 5.6 Service Layer
+### API Contract: GET /api/transactions
 
-#### `TransactionService.java` (exemplo: método `create`)
-```java
-@Transactional
-public TransactionDTO create(TransactionCreateRequest request) {
-  log.info("Creating transaction: type={}, amount={}", request.type(), request.amount());
-
-  Transaction transaction = new Transaction();
-  transaction.setAmount(request.amount());
-  transaction.setType(request.type());  // <-- NEW
-  transaction.setCurrency(request.currency());
-  transaction.setDescription(request.description());
-  transaction.setOccurredAt(request.occurredAt());
-  // ... resto
-
-  Transaction saved = transactionRepository.save(transaction);
-  log.info("Transaction created: id={}, type={}", saved.getId(), saved.getType());
-
-  return transactionMapper.toDTO(saved);
+**Response: 200 OK**
+```json
+{
+  "content": [
+    {
+      "id": "txn-001",
+      "type": "INCOME",
+      "amount": 5000.00,
+      "currency": "USD",
+      "description": "Salary",
+      "occurredAt": "2026-05-01T00:00:00Z",
+      "createdAt": "2026-05-01T08:00:00Z"
+    },
+    {
+      "id": "txn-002",
+      "type": "EXPENSE",
+      "amount": 50.00,
+      "currency": "USD",
+      "description": "Coffee",
+      "occurredAt": "2026-05-02T10:00:00Z",
+      "createdAt": "2026-05-02T10:15:00Z"
+    }
+  ],
+  "totalElements": 2,
+  "totalPages": 1,
+  "currentPage": 0
 }
 ```
 
-### 5.7 Mapper Update
-
-#### `TransactionMapper.java`
-```java
-@Component
-public class TransactionMapper {
-
-  public TransactionDTO toDTO(Transaction entity) {
-    return new TransactionDTO(
-      entity.getId(),
-      entity.getAmount(),
-      entity.getType(),  // <-- NEW
-      entity.getCurrency(),
-      entity.getDescription(),
-      entity.getOccurredAt(),
-      entity.getCategory() != null ? entity.getCategory().getId() : null,
-      entity.getCategory() != null ? entity.getCategory().getName() : null,
-      entity.getMetadata(),
-      entity.getCreatedAt(),
-      entity.getUpdatedAt()
-    );
-  }
-}
-```
-
----
-
-## 6. Frontend Impact — Arquivos Existentes
-
-> ⚠️ Estes são os arquivos **reais do projeto**. Todos os 4 devem ser atualizados nesta SPEC.
-
-### 6.1 `src/types/transaction.ts`
-
-Arquivo atual **não tem** `type`. Precisa adicionar enum + campo nas duas interfaces.
+### Frontend Types
 
 ```typescript
-// ADICIONAR no topo
+// types/transaction.ts
 export enum TransactionType {
   INCOME = 'INCOME',
   EXPENSE = 'EXPENSE',
 }
 
 export interface Transaction {
-  id: string
-  amount: number
-  type: TransactionType  // <-- NEW
-  currency: string
-  description: string
-  occurredAt: string
-  categoryId: string | null
-  categoryName: string | null
-  metadata: string | null
-  createdAt: string
-  updatedAt: string
+  id: string;
+  type: TransactionType;  // NEW FIELD
+  amount: number;
+  currency: string;
+  description?: string;
+  occurredAt: string;
+  categoryId?: string;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
 }
 
 export interface TransactionCreateRequest {
-  amount: number
-  type: TransactionType  // <-- NEW
-  currency: string
-  description: string
-  occurredAt: string
-  categoryId?: string | null
-  metadata?: string | null
+  type: TransactionType;  // NEW FIELD (required)
+  amount: number;
+  currency: string;
+  description?: string;
+  occurredAt: string;
+  categoryId?: string;
+  metadata?: Record<string, unknown>;
 }
 
 export interface TransactionUpdateRequest extends TransactionCreateRequest {}
@@ -355,293 +280,178 @@ export interface TransactionUpdateRequest extends TransactionCreateRequest {}
 
 ---
 
-### 6.2 `src/services/transactionService.ts`
+## 🗂️ File Changes Summary
 
-`create()` atualmente envia body **sem `type`** → backend retorna `400`.
+### Backend Files to Create/Modify
 
-```typescript
-// ANTES (quebra com novo backend)
-await transactionService.create({
-  amount,
-  currency: currency.trim().toUpperCase(),
-  description: description.trim(),
-  occurredAt: new Date(occurredAt).toISOString(),
-})
+| File | Action | Scope |
+|------|--------|-------|
+| `backend/src/main/java/com/pocketfinance/backend/entity/Transaction.java` | Modify | Add `type: TransactionType` field |
+| `backend/src/main/java/com/pocketfinance/backend/entity/TransactionType.java` | Create | New Enum |
+| `backend/src/main/resources/db/migration/V003__add_transaction_type.sql` | Create | Database migration |
+| `backend/src/main/java/com/pocketfinance/backend/dto/TransactionCreateRequest.java` | Modify | Add `type` field |
+| `backend/src/main/java/com/pocketfinance/backend/dto/TransactionUpdateRequest.java` | Modify | Add `type` field |
+| `backend/src/main/java/com/pocketfinance/backend/dto/TransactionDTO.java` | Modify | Add `type` field |
+| `backend/src/main/java/.../TransactionMapper.java` | Modify | Map `type` field |
+| `backend/src/test/java/.../TransactionControllerTest.java` | Modify | Add tests for new type field |
+| `backend/src/test/java/.../TransactionRepositoryTest.java` | Modify | Add tests for new type field |
+| `tools/postman/pocketFinance_collection.json` | Modify | Add INCOME/EXPENSE examples |
 
-// DEPOIS (envia type)
-await transactionService.create({
-  amount,
-  type,                                   // <-- NEW
-  currency: currency.trim().toUpperCase(),
-  description: description.trim(),
-  occurredAt: new Date(occurredAt).toISOString(),
-})
-```
+### Frontend Files to Create/Modify
 
----
-
-### 6.3 `src/app/transactions/new/page.tsx`
-
-Form atual **não tem campo type**. Precisa de estado + select + validação.
-
-```typescript
-// ADICIONAR estado
-const [type, setType] = useState<TransactionType>(TransactionType.EXPENSE)
-
-// ADICIONAR no FormValues e FormErrors
-type FormValues = {
-  amount: number
-  type: TransactionType  // <-- NEW
-  currency: string
-  description: string
-  occurredAt: string
-}
-
-// ADICIONAR no validationSchema
-type: [
-  (values) => (!values.type ? 'Tipo obrigatório' : ''),
-],
-
-// ADICIONAR no JSX (antes do campo amount)
-<select
-  value={type}
-  onChange={(e) => setType(e.target.value as TransactionType)}
->
-  <option value={TransactionType.EXPENSE}>Despesa</option>
-  <option value={TransactionType.INCOME}>Receita</option>
-</select>
-{errors.type && <p className="text-red-500 text-sm">{errors.type}</p>}
-```
+| File | Action | Scope |
+|------|--------|-------|
+| `frontend/src/types/transaction.ts` | Modify | Add `TransactionType` enum, update `Transaction` interface |
+| `frontend/src/services/transactionService.ts` | Modify | Send `type` in POST/PUT bodies |
+| `frontend/src/app/transactions/new/page.tsx` | Modify | Add type select field to form |
+| `frontend/src/components/TransactionItem.tsx` | Modify | Render type badge, update color logic |
 
 ---
 
-### 6.4 `src/components/TransactionItem.tsx`
+## 🚨 Breaking Changes & Migration
 
-Lógica atual usa `amount < 0` para cor — sempre verde agora (amount é sempre positivo).
+### ⚠️ Frontend Will Break After Backend Deploys
 
-```typescript
-// ANTES (sempre verde porque amount nunca é negativo)
-className={`font-semibold ${transaction.amount < 0 ? 'text-red-500' : 'text-green-500'}`}
+**Until frontend is updated:**
+- `POST /api/transactions` will return **HTTP 400** (type is required but frontend doesn't send it)
+- Existing transactions will appear with `type: EXPENSE` (historical default)
+- Frontend form will submit requests without `type` (validation fails)
 
-// DEPOIS (usa type para determinar cor)
-className={`font-semibold ${transaction.type === TransactionType.EXPENSE ? 'text-red-500' : 'text-green-500'}`}
-```
+**Solution:** Deploy frontend changes **on the same release** or use feature flags to gate the type field requirement.
 
----
+### Migration Strategy: Safe Defaults
 
-## 7. API Contract Atualizado
-
-### Create: `POST /api/transactions`
-
-**Request:**
-```json
-{
-  "amount": 1500.00,
-  "type": "INCOME",
-  "currency": "BRL",
-  "description": "Salário mensal",
-  "occurredAt": "2024-03-01T00:00:00Z",
-  "categoryId": null,
-  "metadata": null
-}
-```
-
-**Response (201 Created):**
-```json
-{
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "amount": 1500.00,
-  "type": "INCOME",
-  "currency": "BRL",
-  "description": "Salário mensal",
-  "occurredAt": "2024-03-01T00:00:00Z",
-  "categoryId": null,
-  "categoryName": null,
-  "metadata": null,
-  "createdAt": "2024-03-10T14:30:00Z",
-  "updatedAt": "2024-03-10T14:30:00Z"
-}
-```
-
-### Expense Example: `POST /api/transactions`
-
-**Request:**
-```json
-{
-  "amount": 250.00,
-  "type": "EXPENSE",
-  "currency": "BRL",
-  "description": "Compra no supermercado",
-  "occurredAt": "2024-03-10T10:15:00Z",
-  "categoryId": null,
-  "metadata": null
-}
-```
-
-### List: `GET /api/transactions?page=0&size=10`
-
-```json
-{
-  "content": [
-    {
-      "id": "...",
-      "amount": 1500.00,
-      "type": "INCOME",
-      "currency": "BRL",
-      "description": "Salário mensal",
-      "occurredAt": "2024-03-01T00:00:00Z",
-      "createdAt": "2024-03-10T14:30:00Z",
-      "updatedAt": "2024-03-10T14:30:00Z"
-    },
-    {
-      "id": "...",
-      "amount": 250.00,
-      "type": "EXPENSE",
-      "currency": "BRL",
-      "description": "Compra no supermercado",
-      "occurredAt": "2024-03-10T10:15:00Z",
-      "createdAt": "2024-03-10T14:20:00Z",
-      "updatedAt": "2024-03-10T14:20:00Z"
-    }
-  ],
-  "page": 0,
-  "size": 10,
-  "totalElements": 2,
-  "totalPages": 1,
-  "first": true,
-  "last": true
-}
-```
+- All existing transactions get `type = 'EXPENSE'` (conservative: assume spending)
+- No data loss
+- Existing balance calculations unaffected (all positive amounts)
+- Dashboard can optionally recalculate with new logic after migration
 
 ---
 
-## 8. Dev Plan
+## 🔧 Code Style & Conventions
 
-### Backend (2h)
+### Backend
 
-| # | Task | Critério |
-|---|------|----------|
-| 1 | Criar Enum `TransactionType` (INCOME, EXPENSE) | Compila |
-| 2 | Atualizar Entity `Transaction` — adicionar `type` field | Compila, JPA reconhece |
-| 3 | Criar Flyway migration `V003__add_transaction_type.sql` | Migration roda sem erro |
-| 4 | Atualizar `TransactionCreateRequest` com field `type` | DTO válido |
-| 5 | Atualizar `TransactionUpdateRequest` com field `type` | DTO válido |
-| 6 | Atualizar `TransactionDTO` com field `type` | DTO válido |
-| 7 | Atualizar `TransactionMapper` — mapeiar novo field | Mapper cobre 100% dos campos |
-| 8 | Atualizar `TransactionService` — logs + validações | Service cria ambos tipos |
-| 9 | Testar manualmente via Postman (create INCOME + EXPENSE) | Ambos tipos salvam corretamente |
-| 10 | Atualizar `tools/postman/pocketFinance_collection.json` com exemplos | Collection tem exemplos claros |
+- Java: Follow `pocketFinance` project conventions (Spring Boot, Hibernate, Lombok if used)
+- Enum: Use UPPERCASE names (INCOME, EXPENSE)
+- Validation: Use `@NotNull`, `@Positive`, standard JSR-303 annotations
+- DTO: Use immutable records or standard Lombok `@Data` + `@Builder`
+- Mapper: Use MapStruct or manual mapper (match existing project style)
+- Tests: Follow existing test structure (unit + integration)
 
-### Frontend (Integrado em C2, C3, C4)
+### Frontend
 
-| # | Task | Quando | Critério |
-|---|------|--------|----------|
-| A | Atualizar `types/transaction.ts` com `TransactionType` enum | C2 | TypeScript compila |
-| B | Exibir tipo em `TransactionItem` (C2) | C2 | Lista mostra "💰 Receita" ou "💸 Despesa" |
-| C | Adicionar select de tipo em form (C3) | C3 | Form permite escolher tipo |
-| D | Permitir editar tipo (C4) | C4 | Update preserva tipo ou permite mudar |
+- TypeScript: Strict mode (`strict: true` in tsconfig)
+- React: Functional components, hooks (match Next.js 14 conventions)
+- Styling: Match existing CSS/TailwindCSS approach (check existing TransactionItem.tsx)
+- Form: Use existing form patterns (library or vanilla HTML)
+- Types: Enums capitalized, interfaces start with `I` or pascal case (match project)
 
 ---
 
-## 9. Spike Pedagógico
+## 🧪 Testing Strategy
 
-Após implementar, o TL deve explorar com o Dev:
+### Backend Tests
 
-1. **Por quê Enum?** (vs string "INCOME" / "EXPENSE")
-   - Type-safe em Java
-   - Evita typos
-   - Fácil de validar
+| Test | Framework | Scope |
+|------|-----------|-------|
+| `TransactionTypeEnumTest` | JUnit 5 | Enum values exist and serialize correctly |
+| `TransactionEntityTest` | JUnit 5 | Entity has type field, non-null constraint |
+| `TransactionCreateRequestValidationTest` | JUnit 5, RestAssured | Missing type → 400 Bad Request |
+| `TransactionControllerTest` | JUnit 5, MockMvc | POST with INCOME/EXPENSE works |
+| `TransactionIntegrationTest` | JUnit 5, TestRestTemplate | Full stack: POST → GET → verify type |
+| `TransactionRepositoryTest` | JUnit 5, DataJpaTest | Query by type, find all INCOME vs EXPENSE |
+| `FlywayMigrationTest` | JUnit 5 | Migration V003 runs, data intact, not null enforced |
 
-2. **Flyway Migration** (como schema evolui)
-   - Versioning de BD
-   - Rastreabilidade
-   - Como DEFAULT 'EXPENSE' protege dados históricos
+### Frontend Tests
 
-3. **Impacto em cascata**
-   - Mudança de modelo → DTOs mudam → Frontend muda
-   - Por que é importante planejar mudanças de schema cedo
+| Test | Framework | Scope |
+|------|-----------|-------|
+| `TransactionType.test.ts` | Jest | Enum values exported and correct |
+| `TransactionItem.test.tsx` | React Testing Library | INCOME → green badge, EXPENSE → red badge |
+| `new/page.test.tsx` | React Testing Library | Type select visible, required, validates |
+| `transactionService.test.ts` | Jest, MSW | create() sends type, parses response |
 
-4. **Filtering no Dashboard** (próximo passo)
-   - `GET /api/transactions?type=EXPENSE` — filtrar por tipo
-   - `SELECT SUM(amount) WHERE type='INCOME'` — calcular receita total
+### Manual Tests (Postman / Browser)
 
----
-
-## 10. Migration Workflow
-
-### Dev local:
-
-```bash
-# 1. Backend já tem V001, V002... adiciona V003
-# 2. Rodeia backend com `mvn spring-boot:run`
-#    Flyway executa V003 automaticamente
-# 3. Verifica banco com Adminer
-#    SELECT * FROM transactions;
-#    Column 'type' agora existe com default 'EXPENSE'
-
-# 4. Testa POST /api/transactions com type=INCOME
-# 5. Testa POST /api/transactions com type=EXPENSE
-```
-
-### Banco existente (já tem dados):
-
-```sql
--- Após migration rodar, todos os registros históricos têm type='EXPENSE'
--- Dev pode categorizar melhor depois se quiser:
--- UPDATE transactions SET type='INCOME' WHERE description LIKE '%salário%'
-```
+1. **Create INCOME transaction** → POST /api/transactions with type=INCOME → verify response has type
+2. **Create EXPENSE transaction** → POST /api/transactions with type=EXPENSE → verify response has type
+3. **List transactions** → GET /api/transactions → verify both types appear
+4. **Update transaction type** → PUT /api/transactions/{id} with new type → verify change
+5. **Form submission (frontend)** → Fill form with type, submit → verify request body includes type
 
 ---
 
-## 11. Risk Assessment
+## ⏱️ Implementation Sequence
 
-| Risco | Probabilidade | Impacto | Mitigação |
-|-------|---------------|---------|-----------|
-| Dados históricos perdidos | Baixa | Alto | Flyway com DEFAULT 'EXPENSE' mantém dados |
-| Quebra API existente | Média | Alto | Field `type` é obrigatório — rejeitará requests antigos |
-| Confusão com "negative amounts" | Baixa | Baixo | Documentar: amount é SEMPRE positivo, type define direção |
+**Phase 1: Backend Foundation (1.5h)**
+1. Create TransactionType enum
+2. Add migration V003
+3. Update Entity Transaction
+4. Update DTOs (Create, Update, Response)
+5. Update Mapper
+6. Run `./mvnw test` — ensure no failures
 
----
+**Phase 2: Backend Testing (0.5h)**
+1. Write unit tests (enum, entity, validation)
+2. Write integration tests (POST/GET with both types)
+3. Verify migration test
+4. All tests pass
 
-## 12. Backward Compatibility
+**Phase 3: Frontend Integration (1h)**
+1. Update types/transaction.ts
+2. Update transactionService.ts
+3. Update new/page.tsx (add type field)
+4. Update TransactionItem.tsx (render type, update colors)
+5. Run `npm test` + `npm run build`
 
-**❌ NÃO é totalmente backward compatible:**
-- Clientes antigos que enviam `{ amount: 150, currency: "BRL", ... }` sem `type` receberão `400 Bad Request`
-- **Mitigação:** Documentar na changelog que `type` é novo field obrigatório
+**Phase 4: Documentation & QA (0.5h)**
+1. Update Postman collection
+2. Manual smoke tests (Postman + browser)
+3. Verify no console errors
+4. Update README if needed
 
-**✅ Dados antigos não são perdidos:**
-- Flyway migration usa DEFAULT, então registros históricos não são deletados
-
----
-
-## 13. Out of Scope
-
-- Balancing (calculara saldo = receitas - despesas) — será no Dashboard (Épico D)
-- Categorias diferenciadas por tipo (INCOME_CATEGORIES vs EXPENSE_CATEGORIES) — futuro
-- Recurring transactions (transações recorrentes) — futuro
-- Orçamentos — futuro
-
----
-
-## 14. References
-
-- `PROJECT-CONTEXT.md` — Visão geral
-- `SPEC-003` — Como frontend lista (será atualizado para exibir type)
-- `SPEC-004` — Como frontend cria (será atualizado para selecionar type)
-- Entity: `backend/src/main/java/com/pocketfinance/backend/model/Transaction.java`
-- DTOs: `backend/src/main/java/com/pocketfinance/backend/dto/`
+**Total: ~3.5h**
 
 ---
 
-## 15. Done Checklist
+## 📊 Verification Checklist
 
-Antes de dar "Done", verificar:
+Before marking this spec as DONE:
 
-- [ ] Enum criado e testado
-- [ ] Entity com novo field compilando
-- [ ] Migration rodou sem erro (Adminer mostra coluna `type`)
-- [ ] DTOs atualizados (create, update, response)
-- [ ] Service passando tests
-- [ ] Postman collection com 4 requisições: GET, POST (INCOME), POST (EXPENSE), PUT
-- [ ] Sem erros de compilação/runtime
-- [ ] Dev entende conceito de "type = semântica, amount = sempre positivo"
+- [ ] Backend compiles: `./mvnw clean compile` ✓
+- [ ] All backend tests pass: `./mvnw test` ✓
+- [ ] Frontend builds: `npm run build` ✓
+- [ ] Frontend tests pass: `npm test` ✓
+- [ ] No TypeScript errors: `npx tsc --noEmit` ✓
+- [ ] Postman collection updated with examples ✓
+- [ ] Manual test: Create INCOME, GET returns INCOME ✓
+- [ ] Manual test: Create EXPENSE, GET returns EXPENSE ✓
+- [ ] Manual test: Missing type returns HTTP 400 ✓
+- [ ] No secrets in code ✓
+- [ ] No debug/console.log left behind ✓
+- [ ] Git commit message is clear and concise ✓
+- [ ] PR description links to this spec ✓
+
+---
+
+## 🔗 Related Specs & Issues
+
+- **Blocks:** SPEC-005 (Edit Transaction) — requires type field in UI
+- **Depends on:** Backend CRUD complete (POST, GET, PUT, DELETE working)
+- **Future:** SPEC-006 (Dashboard Balance) — will use type to calculate income - expenses
+
+---
+
+## 📝 Notes
+
+- **Why always positive amounts?** Semantic meaning comes from `type`, not sign. This is clearer and prevents accidental negative deposits.
+- **Why EXPENSE as default?** Conservative approach — if uncertain, assume it's spending. Can be reviewed later if needed.
+- **Why frontend must update together?** Type is `required` on backend, so frontend form must collect it. Deploying backend alone breaks existing transactions.
+
+---
+
+**Version:** 1.0  
+**Last Updated:** 2026-05-02  
+**Author:** Spec Driven Development
+

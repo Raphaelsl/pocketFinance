@@ -41,7 +41,8 @@ public class TransactionServiceImpl implements TransactionService {
                 null,
                 request.metadata(),
                 Instant.now(),
-                Instant.now()
+                Instant.now(),
+                request.type()  // NEW: set type from request
         );
 
         Transaction saved = transactionRepository.save(transaction);
@@ -84,6 +85,7 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Transaction not found with id: " + id));
 
+        transaction.setType(request.type());  // NEW: set type from request
         transaction.setAmount(request.amount());
         transaction.setCurrency(request.currency());
         transaction.setDescription(request.description());
@@ -108,6 +110,7 @@ public class TransactionServiceImpl implements TransactionService {
     private TransactionResponse mapToResponse(Transaction transaction) {
         return new TransactionResponse(
                 transaction.getId(),
+                transaction.getType(),  // NEW: add type field
                 transaction.getAmount(),
                 transaction.getCurrency(),
                 transaction.getDescription(),

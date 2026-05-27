@@ -1,5 +1,6 @@
 package com.pocketfinance.backend.dto;
 
+import com.pocketfinance.backend.model.TransactionType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -9,6 +10,9 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record TransactionUpdateRequest(
+        @NotNull(message = "Type is required (INCOME or EXPENSE)")
+        TransactionType type,
+
         @NotNull(message = "Amount is required")
         @Positive(message = "Amount must be positive")
         BigDecimal amount,

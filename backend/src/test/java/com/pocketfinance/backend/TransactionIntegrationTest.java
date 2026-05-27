@@ -2,6 +2,7 @@ package com.pocketfinance.backend;
 
 import com.pocketfinance.backend.dto.TransactionCreateRequest;
 import com.pocketfinance.backend.dto.TransactionUpdateRequest;
+import com.pocketfinance.backend.model.TransactionType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -20,6 +22,7 @@ import java.util.regex.Pattern;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 @DisplayName("Transaction Integration Tests")
 class TransactionIntegrationTest {
 
@@ -36,11 +39,13 @@ class TransactionIntegrationTest {
         baseUrl = "http://localhost:" + port + "/api/transactions";
     }
 
+    // Integration tests use the H2 test profile.
     @Test
     @DisplayName("Should create a valid transaction successfully")
     void shouldCreateValidTransaction() {
         // Arrange
         TransactionCreateRequest request = new TransactionCreateRequest(
+                TransactionType.EXPENSE,  // NEW: add type
                 new BigDecimal("150.50"),
                 "BRL",
                 "Compra no mercado",
@@ -75,6 +80,7 @@ class TransactionIntegrationTest {
     void shouldReturn400WhenCreatingInvalidTransaction() {
         // Arrange - Invalid request with negative amount and empty description
         TransactionCreateRequest request = new TransactionCreateRequest(
+                TransactionType.EXPENSE,  // NEW: add type
                 new BigDecimal("-50.00"),
                 "",
                 "",
@@ -104,6 +110,7 @@ class TransactionIntegrationTest {
     void shouldListTransactionsWithPagination() {
         // Arrange - Create a transaction first
         TransactionCreateRequest createRequest = new TransactionCreateRequest(
+                TransactionType.EXPENSE,  // NEW: add type
                 new BigDecimal("200.00"),
                 "BRL",
                 "Compra de roupas",
@@ -145,6 +152,7 @@ class TransactionIntegrationTest {
         // Usamos o doesNotContain para ter certeza absoluta de que não vazou implementação.
         assertThat(response.getBody()).doesNotContain("\"pageable\":");
         assertThat(response.getBody()).doesNotContain("\"sort\":");
+        assertThat(response.getBody()).contains("\"type\"");
     }
 
     @Test
@@ -152,6 +160,7 @@ class TransactionIntegrationTest {
     void shouldGetTransactionById() {
         // Arrange - Create a transaction first
         TransactionCreateRequest createRequest = new TransactionCreateRequest(
+                TransactionType.EXPENSE,  // NEW: add type
                 new BigDecimal("100.00"),
                 "BRL",
                 "Lanche",
@@ -186,6 +195,7 @@ class TransactionIntegrationTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody()).contains("100.00");
         assertThat(response.getBody()).contains("Lanche");
+        assertThat(response.getBody()).contains("\"type\":\"EXPENSE\"");
     }
 
     @Test
@@ -193,6 +203,7 @@ class TransactionIntegrationTest {
     void shouldUpdateTransaction() {
         // Arrange - Create a transaction first
         TransactionCreateRequest createRequest = new TransactionCreateRequest(
+                TransactionType.EXPENSE,  // NEW: add type
                 new BigDecimal("50.00"),
                 "BRL",
                 "Café",
@@ -216,6 +227,7 @@ class TransactionIntegrationTest {
 
         // Update the transaction
         TransactionUpdateRequest updateRequest = new TransactionUpdateRequest(
+                TransactionType.INCOME,  // NEW: switch type to verify update
                 new BigDecimal("75.00"),
                 "BRL",
                 "Café e bolo",
@@ -239,6 +251,7 @@ class TransactionIntegrationTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody()).contains("75.00");
         assertThat(response.getBody()).contains("Café e bolo");
+        assertThat(response.getBody()).contains("\"type\":\"INCOME\"");
     }
 
     @Test
@@ -246,6 +259,7 @@ class TransactionIntegrationTest {
     void shouldDeleteTransaction() {
         // Arrange - Create a transaction first
         TransactionCreateRequest createRequest = new TransactionCreateRequest(
+                TransactionType.EXPENSE,  // NEW: add type
                 new BigDecimal("300.00"),
                 "BRL",
                 "Restaurante",
@@ -313,6 +327,7 @@ class TransactionIntegrationTest {
         // Arrange
         UUID nonExistentId = UUID.randomUUID();
         TransactionUpdateRequest updateRequest = new TransactionUpdateRequest(
+                TransactionType.EXPENSE,  // NEW: add type
                 new BigDecimal("100.00"),
                 "BRL",
                 "Test",
@@ -353,6 +368,74 @@ class TransactionIntegrationTest {
 
         // Assert
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("Should create INCOME transaction and return type in response")
+    void shouldCreateIncomeTransactionWithType() {
+        // Arrange - Create request with type=INCOME
+        TransactionCreateRequest request = new TransactionCreateRequest(
+                TransactionType.INCOME,  // NEW: type field (first parameter)
+                new BigDecimal("5000.00"),
+                "USD",
+                "Monthly salary",
+                Instant.now(),
+                null,
+                null
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<TransactionCreateRequest> entity = new HttpEntity<>(request, headers);
+
+        // Act
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl,
+                HttpMethod.POST,
+                entity,
+                String.class
+        );
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).contains("\"type\"");
+        assertThat(response.getBody()).contains("INCOME");
+        assertThat(response.getBody()).contains("5000.00");
+    }
+
+    @Test
+    @DisplayName("Should create EXPENSE transaction and return type in response")
+    void shouldCreateExpenseTransactionWithType() {
+        // Arrange - Create request with type=EXPENSE
+        TransactionCreateRequest request = new TransactionCreateRequest(
+                TransactionType.EXPENSE,  // NEW: type field (first parameter)
+                new BigDecimal("50.00"),
+                "USD",
+                "Grocery shopping",
+                Instant.now(),
+                null,
+                null
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<TransactionCreateRequest> entity = new HttpEntity<>(request, headers);
+
+        // Act
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl,
+                HttpMethod.POST,
+                entity,
+                String.class
+        );
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody()).contains("\"type\"");
+        assertThat(response.getBody()).contains("EXPENSE");
+        assertThat(response.getBody()).contains("50.00");
     }
 
     /**
