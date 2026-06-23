@@ -4,15 +4,18 @@
 import {useState} from "react";
 import {useRouter} from "next/navigation";
 import { transactionService } from "@/services/transactionService";
+import { TransactionType } from '@/types/transaction';
 
 type FormErrors = {
     amount: string;
+    type: string;
     currency: string;
     description: string;
     occurredAt: string;
 };
 type FormValues = {
     amount: number;
+    type: TransactionType;
     currency: string;
     description: string;
     occurredAt: string;
@@ -26,6 +29,9 @@ type ValidationSchema = {
 const validationSchema: ValidationSchema = {
     amount: [
         (values) => (values.amount <= 0 ? "Valor deve ser maior que zero" : ""),
+    ],
+    type: [
+        (values) => (!values.type ? "Tipo obrigatorio" : ""),
     ],
     currency: [
         (values) => (!values.currency.trim() ? "Moeda obrigatoria" : ""),
@@ -60,11 +66,13 @@ export default function NewTransactionsPage() {
     const router = useRouter();
 
     const [amount, setAmount] = useState<number>(0);
+    const [type, setType] = useState<TransactionType>(TransactionType.INCOME);
     const [currency, setCurrency] = useState<string>('BRL');
     const [description, setDescription] = useState<string>('');
     const [occurredAt, setOccurredAt] = useState<string>('');
     const [errors, setErrors] = useState<FormErrors>({
         amount: "",
+        type: "",
         currency: "",
         description: "",
         occurredAt: "",
@@ -76,7 +84,8 @@ export default function NewTransactionsPage() {
 
 
     const validate = (): boolean => {
-        const values: FormValues = { amount, currency, description, occurredAt };
+        // include type directly to satisfy FormValues typing (avoid any cast)
+        const values: FormValues = { amount, type, currency, description, occurredAt };
         const newErrors = validateForm(values, validationSchema);
 
         setErrors(newErrors);
@@ -94,6 +103,7 @@ export default function NewTransactionsPage() {
         try{
             await  transactionService.create({
                 amount,
+                type,
                 currency : currency.trim().toUpperCase(),
                 description: description.trim(),
                 occurredAt: new Date(occurredAt).toISOString(),
@@ -118,6 +128,14 @@ export default function NewTransactionsPage() {
                     onChange={(e) => setAmount(Number(e.target.value))}
                     placeholder="Valor"
                 />
+                <select
+                    value={type}
+                    onChange={(e) => setType(e.target.value as TransactionType)}
+                >
+                    <option value={TransactionType.INCOME}>INCOME</option>
+                    <option value={TransactionType.EXPENSE}>EXPENSE</option>
+                </select>
+                {errors.type && <p className="text-red-500 text-sm">{errors.type}</p>}
                 {errors.amount && <p className="text-red-500 text-sm">{errors.amount}</p>}
                 <input
                     type="text"

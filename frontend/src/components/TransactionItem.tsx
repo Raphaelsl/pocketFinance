@@ -1,4 +1,4 @@
-import {Transaction} from "@/types/transaction";
+import {Transaction, TransactionType} from "@/types/transaction";
 interface Props{
     transaction: Transaction;// exige obrigatoriamente um obj Transaction
 }
@@ -18,9 +18,9 @@ export default function TransactionItem({transaction}: Props){
                 </p>
             </div>
             <div className="text-right">
-                <p className={`font-semibold ${transaction.amount < 0 ? 'text-red-500' : 'text-green-500'}`}>
+                <p className={`font-semibold ${transaction.type === TransactionType.EXPENSE ? 'text-red-500' : 'text-green-500'}`}>
                     {/* Formatando o dinheiro para o padrão brasileiro */}
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(transaction.amount)}
+                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: transaction.currency || 'BRL' }).format(transaction.amount)}
                 </p>
 
                 {/* Botões que a Task pediu para deixar visíveis (sem lógica ainda) */}
