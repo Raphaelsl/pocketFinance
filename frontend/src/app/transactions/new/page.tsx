@@ -66,7 +66,7 @@ export default function NewTransactionsPage() {
     const router = useRouter();
 
     const [amount, setAmount] = useState<number>(0);
-    const [type, setType] = useState<TransactionType>(TransactionType.INCOME);
+    const [type, setType] = useState<TransactionType>(TransactionType.EXPENSE);
     const [currency, setCurrency] = useState<string>('BRL');
     const [description, setDescription] = useState<string>('');
     const [occurredAt, setOccurredAt] = useState<string>('');

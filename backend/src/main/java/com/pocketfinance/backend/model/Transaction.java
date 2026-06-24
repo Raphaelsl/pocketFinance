@@ -1,6 +1,7 @@
 package com.pocketfinance.backend.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -39,6 +40,7 @@ public class Transaction {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
+    @NotNull(message = "Type is required")
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private TransactionType type;

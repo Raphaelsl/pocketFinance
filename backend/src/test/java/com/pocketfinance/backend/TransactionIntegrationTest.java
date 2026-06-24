@@ -438,6 +438,35 @@ class TransactionIntegrationTest {
         assertThat(response.getBody()).contains("50.00");
     }
 
+    @Test
+    @DisplayName("Should return 400 when type is missing from request")
+    void shouldReturn400WhenTypeMissing() {
+        // Arrange: Request body WITHOUT type field
+        String jsonBody = """
+            {
+                "amount": 50.00,
+                "currency": "BRL",
+                "description": "Test without type",
+                "occurredAt": "2024-06-23T10:30:00Z"
+            }
+            """;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
+
+        // Act
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl,
+                HttpMethod.POST,
+                entity,
+                String.class
+        );
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
     /**
      * Helper method to extract UUID from JSON response
      */

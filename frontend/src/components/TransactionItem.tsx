@@ -22,6 +22,14 @@ export default function TransactionItem({transaction}: Props){
                     {/* Formatando o dinheiro para o padrão brasileiro */}
                     {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: transaction.currency || 'BRL' }).format(transaction.amount)}
                 </p>
+                <p className={`text-xs font-bold px-2 py-1 rounded ${
+                    transaction.type === TransactionType.EXPENSE
+                        ? 'bg-red-100 text-red-700'
+                        : 'bg-green-100 text-green-700'
+                }`}>
+                    {transaction.type}
+                </p>
+
 
                 {/* Botões que a Task pediu para deixar visíveis (sem lógica ainda) */}
                 <div className="flex gap-2 mt-2">
