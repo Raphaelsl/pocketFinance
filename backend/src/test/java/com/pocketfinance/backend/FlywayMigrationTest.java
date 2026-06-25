@@ -64,14 +64,21 @@ class FlywayMigrationTest {
     @Test
     @DisplayName("Should have 'type' column with VARCHAR(20) data type")
     void shouldHaveTypeColumnWithCorrectDataType() {
-        // Verify that the type column has VARCHAR(20) data type
-        String sql = "SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS " +
-                    "WHERE TABLE_NAME = 'TRANSACTIONS' AND COLUMN_NAME = 'TYPE'";
+        // Verifica o tipo do dado (H2 pode retornar VARCHAR ou CHARACTER VARYING)
+        String typeSql = "SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS " +
+                "WHERE TABLE_NAME = 'TRANSACTIONS' AND COLUMN_NAME = 'TYPE'";
+        String dataType = jdbcTemplate.queryForObject(typeSql, String.class);
 
-        String columnType = jdbcTemplate.queryForObject(sql, String.class);
+        assertThat(dataType).isIn("CHARACTER VARYING", "VARCHAR")
+                .withFailMessage("Column 'type' should be a VARCHAR data type");
 
-        assertThat(columnType).isEqualTo("CHARACTER VARYING(20)")
-                .withFailMessage("Column 'type' should be VARCHAR(20) data type");
+        // Verifica o tamanho máximo permitido (20)
+        String lengthSql = "SELECT CHARACTER_MAXIMUM_LENGTH FROM INFORMATION_SCHEMA.COLUMNS " +
+                "WHERE TABLE_NAME = 'TRANSACTIONS' AND COLUMN_NAME = 'TYPE'";
+        Integer length = jdbcTemplate.queryForObject(lengthSql, Integer.class);
+
+        assertThat(length).isEqualTo(20)
+                .withFailMessage("Column 'type' should have a maximum length of 20");
     }
 }
 
