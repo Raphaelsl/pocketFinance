@@ -1,0 +1,19 @@
+tools/specs/asana-cards/CARD-C3-1-create-transaction-polish.md
+  s_7a6076e72cbfe7::t_d2dfc9ab85f9a6 1-77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.6",
+  "base_commit_sha": "f722876dc2b2fa44242ce8553f78468b47f03c14",
+  "prompts": {},
+  "sessions": {
+    "s_7a6076e72cbfe7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f1b56-95c7-7bf1-b7a6-963282592bca",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Jonathan Lameira <jlameira@gmail.com>"
+    }
+  }
+}
