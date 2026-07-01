@@ -12,6 +12,13 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.test.web.servlet.MockMvc;
+
+// Estes são imports "estáticos" essenciais para o MockMvc funcionar
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -22,6 +29,7 @@ import java.util.regex.Pattern;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @DisplayName("Transaction Integration Tests")
 class TransactionIntegrationTest {
@@ -31,6 +39,8 @@ class TransactionIntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
+    @Autowired
+    private MockMvc mockMvc;
 
     private String baseUrl;
 
@@ -436,6 +446,54 @@ class TransactionIntegrationTest {
         assertThat(response.getBody()).contains("\"type\"");
         assertThat(response.getBody()).contains("EXPENSE");
         assertThat(response.getBody()).contains("50.00");
+    }
+
+    @Test
+    @DisplayName("Should return 400 when type is missing from request")
+    void shouldReturn400WhenTypeMissing() {
+        // Arrange: Request body WITHOUT type field
+        String jsonBody = """
+            {
+                "amount": 50.00,
+                "currency": "BRL",
+                "description": "Test without type",
+                "occurredAt": "2024-06-23T10:30:00Z"
+            }
+            """;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>(jsonBody, headers);
+
+        // Act
+        ResponseEntity<String> response = restTemplate.exchange(
+                baseUrl,
+                HttpMethod.POST,
+                entity,
+                String.class
+        );
+
+        // Assert
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+    @Test
+    @DisplayName("Should return 400 Bad Request when POSTing a transaction without type")
+    void shouldReturn400WhenTypeIsMissing() throws Exception {
+        // Montamos um JSON propositalmente faltando o campo "type"
+        String payloadWithoutType = """
+            {
+                "amount": 150.00,
+                "description": "Compra no mercado",
+                "currency": "BRL",
+                "occurredAt": "2026-06-25T15:00:00Z"
+            }
+            """;
+
+        // Simulamos a chamada HTTP para o seu Controller
+        mockMvc.perform(post("/api/transactions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payloadWithoutType))
+                .andExpect(status().isBadRequest()); // Valida se a API barrou e retornou 400
     }
 
     /**

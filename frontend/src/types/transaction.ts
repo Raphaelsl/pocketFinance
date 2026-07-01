@@ -1,6 +1,12 @@
+export enum TransactionType {
+  INCOME = 'INCOME',
+  EXPENSE = 'EXPENSE',
+}
+
 export interface Transaction {
   id: string
   amount: number
+  type: TransactionType
   currency: string
   description: string
   occurredAt: string
@@ -23,6 +29,7 @@ export interface PagedResponse<T> {
 
 export interface TransactionCreateRequest {
   amount: number
+  type: TransactionType
   currency: string
   description: string
   occurredAt: string
@@ -30,4 +37,4 @@ export interface TransactionCreateRequest {
   metadata?: string | null
 }
 
-export interface TransactionUpdateRequest extends TransactionCreateRequest {}
+export type TransactionUpdateRequest = TransactionCreateRequest;
