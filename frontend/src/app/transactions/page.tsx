@@ -21,43 +21,58 @@ export default function TransactionsPage() {
     // EARLY RETURNS
     // ==========================================
     if (loading) {
-        return <p className="p-10 text-center text-gray-400 font-bold mt-20">Carregando transações...</p>;
+        return (
+            <main className="min-h-screen bg-slate-50 px-4 py-10">
+                <p className="mx-auto max-w-3xl rounded-lg border border-slate-200 bg-white p-8 text-center font-medium text-slate-500 shadow-sm">
+                    Carregando transações...
+                </p>
+            </main>
+        );
     }
 
     if (error) {
-        return <p className="p-10 text-center text-red-500 font-bold mt-20">{error}</p>;
+        return (
+            <main className="min-h-screen bg-slate-50 px-4 py-10">
+                <p className="mx-auto max-w-3xl rounded-lg border border-red-200 bg-red-50 p-8 text-center font-medium text-red-700">
+                    {error}
+                </p>
+            </main>
+        );
     }
 
     // ==========================================
     // RENDER PRINCIPAL
     // ==========================================
     return (
-        <main className="container mx-auto p-6 max-w-3xl">
-            <h1 className="text-2xl font-bold mb-6">Minhas Transações</h1>
+        <main className="min-h-screen bg-slate-50 px-4 py-10">
+            <section className="mx-auto max-w-3xl">
+                <div className="mb-6 flex items-center justify-between gap-4">
+                    <div>
+                        <p className="text-sm font-medium text-slate-500">Financeiro</p>
+                        <h1 className="text-2xl font-semibold tracking-tight text-slate-950">Minhas transações</h1>
+                    </div>
 
-            <div className="bg-white border rounded-xl shadow-sm overflow-hidden">
-                <div className="flex flex-col divide-y">
+                    <Link
+                        href="/transactions/new"
+                        className="rounded-md bg-slate-950 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
+                    >
+                        Nova transação
+                    </Link>
+                </div>
+
+                <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div className="flex flex-col divide-y divide-slate-100">
 
                     {transactions.map((t) => (
                         <TransactionItem key={t.id} transaction={t}/>
                     ))}
 
                     {transactions.length === 0 && (
-                        <p className="p-10 text-center text-gray-500">Nenhuma transação encontrada nesta página.</p>
+                        <p className="p-10 text-center text-sm font-medium text-slate-500">Nenhuma transação encontrada nesta página.</p>
                     )}
-                    <div className="flex items-center justify-between mb-6">
-                        <h1 className="text-2xl font-bold">Minhas Transações</h1>
-
-                        <Link
-                            href="/transactions/new"
-                            className="px-4 py-2 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700"
-                        >
-                            New Transaction
-                        </Link>
-                    </div>
 
                     {/* Barra de paginação */}
-                    <div className="p-4 flex justify-between items-center bg-gray-50 border-t mt-4">
+                    <div className="flex items-center justify-between bg-slate-50 p-4">
                         <Button
                             text="Anterior"
                             onClick={() => setPage(page - 1)}
@@ -75,8 +90,9 @@ export default function TransactionsPage() {
                         />
                     </div>
 
+                    </div>
                 </div>
-            </div>
+            </section>
         </main>
     );
 }
