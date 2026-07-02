@@ -1,20 +1,16 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-
-// Sai de test/ (../), sai de components/ (../), entra em new/
 import NewTransactionsPage from '../../app/transactions/new/page';
 import { TransactionType } from '@/types/transaction';
 import { transactionService } from '../../services/transactionService';
-
-// 1. Mock do Next.js Router
+const mockPush = jest.fn();
+const mockRefresh = jest.fn();
 jest.mock('next/navigation', () => ({
     useRouter: () => ({
-        push: jest.fn(),
-        refresh: jest.fn(),
+        push: mockPush,
+        refresh: mockRefresh,
     }),
 }));
-
-// 2. Mock do Service
 jest.mock('../../services/transactionService', () => ({
     transactionService: {
         create: jest.fn(),
@@ -22,63 +18,45 @@ jest.mock('../../services/transactionService', () => ({
 }));
 describe('NewTransactionsPage Unit Tests', () => {
     beforeEach(() => {
-        // Limpa o histórico de Mocks antes de cada teste
         jest.clearAllMocks();
     });
-
-    it('deve enviar o formulário com sucesso alterando o tipo para INCOME', async () => {
-        // Prepara o mock do service para retornar uma promessa resolvida (Sucesso)
+    it('envia o payload normalizado ao criar uma transação válida', async () => {
         (transactionService.create as jest.Mock).mockResolvedValue({});
-
-        // Usamos o 'container' para buscar inputs que não possuem placeholder (como a data)
         const { container } = render(<NewTransactionsPage />);
-
-        // 1. Preenche os inputs de texto e número usando os placeholders
-        fireEvent.change(screen.getByPlaceholderText('Valor'), { target: { value: '150.50' } });
-        fireEvent.change(screen.getByPlaceholderText('BRL'), { target: { value: 'USD' } });
-        fireEvent.change(screen.getByPlaceholderText('Descrição'), { target: { value: 'Projeto Freelance' } });
-
-        // 2. Preenche a data buscando diretamente pela tag input com o tipo correto
+        fireEvent.change(screen.getByLabelText(/valor/i), { target: { value: '150.50' } });
+        fireEvent.change(screen.getByLabelText(/moeda/i), { target: { value: ' usd ' } });
+        fireEvent.change(screen.getByLabelText(/descr/i), {
+            target: { value: ' Projeto Freelance ' },
+        });
         const dateInput = container.querySelector('input[type="datetime-local"]');
-        // Garante que o input existe na tela antes de digitar
         expect(dateInput).not.toBeNull();
         fireEvent.change(dateInput!, { target: { value: '2026-06-24T14:30' } });
-
-        // 3. Altera o Select (Combobox) de EXPENSE (Padrão) para INCOME
-        const typeSelect = screen.getByRole('combobox');
-        fireEvent.change(typeSelect, { target: { value: TransactionType.INCOME } });
-
-        // 4. Clica no botão
-        const submitButton = screen.getByRole('button', { name: /Criar Transação/i });
-        fireEvent.click(submitButton);
-
-        // 5. Aguarda a requisição assíncrona acontecer e valida se o pacote montado está perfeito
+        fireEvent.change(screen.getByRole('combobox'), {
+            target: { value: TransactionType.INCOME },
+        });
+        fireEvent.click(screen.getByRole('button', { name: /Criar trans/i }));
         await waitFor(() => {
             expect(transactionService.create).toHaveBeenCalledWith({
                 amount: 150.5,
-                type: TransactionType.INCOME, // Garante que a troca de tipo funcionou
+                type: TransactionType.INCOME,
                 currency: 'USD',
                 description: 'Projeto Freelance',
-                // O expect.any(String) é usado porque a sua função handleSubmit transforma
-                // a data em ISOString gerando precisão de milissegundos que é variável
                 occurredAt: expect.any(String),
             });
         });
+        expect(mockPush).toHaveBeenCalledWith('/transactions');
+        expect(mockRefresh).toHaveBeenCalled();
     });
-
-    it('deve exibir mensagens de erro do ValidationSchema ao enviar formulário vazio', async () => {
+    it('exibe erros de validação próximos aos campos quando o formulário está incompleto', async () => {
         render(<NewTransactionsPage />);
-
-        // Clica em salvar imediatamente, sem preencher nada
-        const submitButton = screen.getByRole('button', { name: /Criar Transação/i });
-        fireEvent.click(submitButton);
-
-        // Aguarda a renderização das mensagens de erro exatas definidas no seu validationSchema
-        expect(await screen.findByText('Valor deve ser maior que zero')).toBeInTheDocument();
-        expect(screen.getByText('Descricao obrigatoria')).toBeInTheDocument();
-        expect(screen.getByText('Data obrigatoria')).toBeInTheDocument();
-
-        // Garante que a API não foi chamada, pois a validação barrou a requisição com sucesso
+        fireEvent.change(screen.getByLabelText(/moeda/i), { target: { value: 'us' } });
+        fireEvent.click(screen.getByRole('button', { name: /Criar trans/i }));
+        expect(await screen.findByText(/valor.*obrig/i)).toBeInTheDocument();
+        expect(screen.getByText(/moeda deve ter 3 letras/i)).toBeInTheDocument();
+        expect(screen.getByText(/descr.*obrig/i)).toBeInTheDocument();
+        expect(screen.getByText(/data.*obrig/i)).toBeInTheDocument();
         expect(transactionService.create).not.toHaveBeenCalled();
     });
 });
+
+
