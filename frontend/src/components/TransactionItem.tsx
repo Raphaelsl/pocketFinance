@@ -2,39 +2,57 @@ import {Transaction, TransactionType} from "@/types/transaction";
 interface Props{
     transaction: Transaction;// exige obrigatoriamente um obj Transaction
 }
+
+function getDisplayCurrency(currency?: string | null): string {
+    const normalizedCurrency = currency?.trim().toUpperCase();
+
+    if (!normalizedCurrency || !/^[A-Z]{3}$/.test(normalizedCurrency)) {
+        return 'BRL';
+    }
+
+    try {
+        new Intl.NumberFormat('pt-BR', { style: 'currency', currency: normalizedCurrency });
+        return normalizedCurrency;
+    } catch {
+        return 'BRL';
+    }
+}
+
 export default function TransactionItem({transaction}: Props){
 
     const dataFormatada = `${new Date(transaction.occurredAt).toLocaleDateString('pt-BR')} ${new Date(transaction.occurredAt).toLocaleTimeString('pt-BR')}`;
+    const displayCurrency = getDisplayCurrency(transaction.currency);
+    const isExpense = transaction.type === TransactionType.EXPENSE;
     //extraindo o obj diretamente dos args da function
     return(
-        <div className="flex justify-between items-center p-4 border-b">
-            <div>
+        <div className="flex items-center justify-between gap-4 p-4 transition hover:bg-slate-50">
+            <div className="min-w-0">
                 {/*
                     description
                 */}
-                <p className="font-bold text-gray-500">{transaction.description}</p>
-                <p className="text-sm text-gray-500">
+                <p className="truncate font-medium text-slate-950">{transaction.description}</p>
+                <p className="mt-1 text-sm text-slate-500">
                     <span>{dataFormatada}</span>
                 </p>
             </div>
-            <div className="text-right">
-                <p className={`font-semibold ${transaction.type === TransactionType.EXPENSE ? 'text-red-500' : 'text-green-500'}`}>
+            <div className="shrink-0 text-right">
+                <p className={`font-semibold ${isExpense ? 'text-red-600' : 'text-emerald-600'}`}>
                     {/* Formatando o dinheiro para o padrão brasileiro */}
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: transaction.currency || 'BRL' }).format(transaction.amount)}
+                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: displayCurrency }).format(transaction.amount)}
                 </p>
-                <p className={`text-xs font-bold px-2 py-1 rounded ${
-                    transaction.type === TransactionType.EXPENSE
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-green-100 text-green-700'
+                <p className={`mt-1 inline-flex rounded px-2 py-1 text-xs font-semibold ${
+                    isExpense
+                        ? 'bg-red-50 text-red-700'
+                        : 'bg-emerald-50 text-emerald-700'
                 }`}>
-                    {transaction.type}
+                    {isExpense ? 'Despesa' : 'Receita'}
                 </p>
 
 
                 {/* Botões que a Task pediu para deixar visíveis (sem lógica ainda) */}
-                <div className="flex gap-2 mt-2">
-                    <button className="text-xs text-blue-500 hover:underline">Editar</button>
-                    <button className="text-xs text-red-400 hover:underline">Excluir</button>
+                <div className="mt-2 flex justify-end gap-3">
+                    <button className="text-xs font-medium text-slate-500 hover:text-slate-950">Editar</button>
+                    <button className="text-xs font-medium text-red-500 hover:text-red-700">Excluir</button>
                 </div>
             </div>
         </div>
