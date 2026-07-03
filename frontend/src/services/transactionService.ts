@@ -13,7 +13,8 @@ export const transactionService = {
     return response.json();
   },
 
-  getById: async (id: string): Promise<Transaction> => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getById: async (_id: string): Promise<Transaction> => {
     // Implementado em SPEC-005 (C4)
     throw new Error('Not implemented')
   },
@@ -28,12 +29,14 @@ export const transactionService = {
     return response.json();
   },
 
-  update: async (id: string, data: TransactionUpdateRequest): Promise<Transaction> => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  update: async (_id: string, _data: TransactionUpdateRequest): Promise<Transaction> => {
     // Implementado em SPEC-005 (C4)
     throw new Error('Not implemented')
   },
 
-  delete: async (id: string): Promise<void> => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  delete: async (_id: string): Promise<void> => {
     // Implementado em SPEC-006 (C5)
     throw new Error('Not implemented')
   },

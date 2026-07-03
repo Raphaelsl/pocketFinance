@@ -34,9 +34,16 @@ function normalizeCurrency(currency: string) {
 
 function validateForm(values: FormValues): FormErrors {
     const normalizedCurrency = normalizeCurrency(values.currency);
+    let amountError = '';
+
+    if (!values.amount.trim()) {
+        amountError = 'Valor é obrigatório';
+    } else if (!Number.isFinite(Number(values.amount)) || Number(values.amount) <= 0) {
+        amountError = 'Valor deve ser maior que zero';
+    }
 
     return {
-        amount: values.amount.trim() ? '' : 'Valor é obrigatório',
+        amount: amountError,
         type: values.type ? '' : 'Tipo é obrigatório',
         currency: currencyPattern.test(normalizedCurrency)
             ? ''
@@ -82,13 +89,6 @@ export default function NewTransactionsPage() {
 
         const amountValue = Number(amount);
 
-        if (!Number.isFinite(amountValue) || amountValue <= 0) {
-            setErrors((current) => ({
-                ...current,
-                amount: 'Valor deve ser maior que zero',
-            }));
-            return;
-        }
 
         setLoading(true);
 
