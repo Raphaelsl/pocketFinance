@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Header } from '@/components/layout/Header'
 import './globals.css'
+import { Providers } from './providers'
 
 export const metadata: Metadata = {
   title: 'PocketFinance',
@@ -8,18 +9,20 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({
-  children,
-}: Readonly<{
+                                     children,
+                                   }: Readonly<{
   children: React.ReactNode
 }>) {
   return (
-    <html lang="pt-BR">
+      <html lang="pt-BR">
       <body>
+      <Providers>
         <Header />
         <main className="max-w-6xl mx-auto px-4 py-8">
           {children}
         </main>
+      </Providers>
       </body>
-    </html>
+      </html>
   )
 }

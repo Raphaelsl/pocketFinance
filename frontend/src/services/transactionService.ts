@@ -1,5 +1,6 @@
 import { PagedResponse, Transaction, TransactionCreateRequest, TransactionUpdateRequest } from '@/types/transaction'
 
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 export const transactionService = {
@@ -14,9 +15,12 @@ export const transactionService = {
   },
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getById: async (_id: string): Promise<Transaction> => {
-    // Implementado em SPEC-005 (C4)
-    throw new Error('Not implemented')
+  getById: async (id: string): Promise<Transaction> => {
+    const response = await fetch(`${API_URL}/transactions/${id}`);
+    if (!response.ok) {
+      throw new Error('Transação não encontrada');
+    }
+    return response.json();
   },
 
   create: async (data: TransactionCreateRequest): Promise<Transaction> => {
@@ -30,9 +34,16 @@ export const transactionService = {
   },
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  update: async (_id: string, _data: TransactionUpdateRequest): Promise<Transaction> => {
-    // Implementado em SPEC-005 (C4)
-    throw new Error('Not implemented')
+  update: async (id: string, data: TransactionUpdateRequest): Promise<Transaction> => {
+    const response = await fetch(`${API_URL}/transactions/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Erro ao atualizar transação');
+    }
+    return response.json();
   },
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -1,4 +1,5 @@
 import {Transaction, TransactionType} from "@/types/transaction";
+import Link from 'next/link';
 interface Props{
     transaction: Transaction;// exige obrigatoriamente um obj Transaction
 }
@@ -51,7 +52,12 @@ export default function TransactionItem({transaction}: Props){
 
                 {/* Botões que a Task pediu para deixar visíveis (sem lógica ainda) */}
                 <div className="mt-2 flex justify-end gap-3">
-                    <button className="text-xs font-medium text-slate-500 hover:text-slate-950">Editar</button>
+                    <Link
+                        href={`/transactions/${transaction.id}/edit`}
+                        className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                        Editar
+                    </Link>
                     <button className="text-xs font-medium text-red-500 hover:text-red-700">Excluir</button>
                 </div>
             </div>
