@@ -2,6 +2,7 @@ import {Transaction, TransactionType} from "@/types/transaction";
 import Link from 'next/link';
 interface Props{
     transaction: Transaction;// exige obrigatoriamente um obj Transaction
+    onDelete: (id: string) => void;
 }
 
 function getDisplayCurrency(currency?: string | null): string {
@@ -19,7 +20,8 @@ function getDisplayCurrency(currency?: string | null): string {
     }
 }
 
-export default function TransactionItem({transaction}: Props){
+
+export default function TransactionItem({transaction, onDelete}: Props){
 
     const dataFormatada = `${new Date(transaction.occurredAt).toLocaleDateString('pt-BR')} ${new Date(transaction.occurredAt).toLocaleTimeString('pt-BR')}`;
     const displayCurrency = getDisplayCurrency(transaction.currency);
@@ -58,7 +60,12 @@ export default function TransactionItem({transaction}: Props){
                     >
                         Editar
                     </Link>
-                    <button className="text-xs font-medium text-red-500 hover:text-red-700">Excluir</button>
+                    <button
+                        onClick={() => onDelete(transaction.id)}
+                        className="text-xs font-medium text-red-500 hover:text-red-700"
+                    >
+                        Excluir
+                    </button>
                 </div>
             </div>
         </div>

@@ -6,6 +6,7 @@ interface ButtonProps {
     onClick: () => void;
 }
 
+
 export default function Button({ text, disabled, onClick }: ButtonProps) {
     return (
         <button

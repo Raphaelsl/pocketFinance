@@ -1,6 +1,9 @@
 'use client';
 
 import {useState} from 'react';
+import {useMutation, useQueryClient} from '@tanstack/react-query';
+import { transactionService } from '@/services/transactionService';
+import { ConfirmDeleteModal } from '@/components/ConfirmDeleteModal';
 import TransactionItem from '@/components/TransactionItem';
 import Button from "@/components/Button";
 import {useTransactions} from "@/hooks/useTransactions";
@@ -9,12 +12,31 @@ import Link from "next/link";
 
 
 export default function TransactionsPage() {
-
+    const queryClient = useQueryClient();
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
     // A tela só controla em qual página estamos
     const [page, setPage] = useState<number>(0);
 
     // Puxa os dados Custom Hook
     const {transactions, loading, error, totalPages} = useTransactions(page);
+
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) => transactionService.delete(id),
+        onSuccess: () => {
+            // Atualiza a lista na tela automaticamente
+            queryClient.invalidateQueries({ queryKey: ['transactions'] });
+            setDeletingId(null); // Fecha o modal
+            setDeleteError(null);
+        },
+        onError: (err: Error) => {
+            setDeleteError(err.message);
+        },
+    });
+
+    const getTransactionDescription = (id: string) => {
+        return transactions.find((t) => t.id === id)?.description ?? '';
+    };
     const hasNextPage = page < totalPages - 1;
 
     // ==========================================
@@ -64,7 +86,11 @@ export default function TransactionsPage() {
                     <div className="flex flex-col divide-y divide-slate-100">
 
                     {transactions.map((t) => (
-                        <TransactionItem key={t.id} transaction={t}/>
+                        <TransactionItem
+                            key={t.id}
+                            transaction={t}
+                            onDelete={(id) => setDeletingId(id)}
+                        />
                     ))}
 
                     {transactions.length === 0 && (
@@ -93,6 +119,18 @@ export default function TransactionsPage() {
                     </div>
                 </div>
             </section>
+            {deletingId && (
+                <ConfirmDeleteModal
+                    description={getTransactionDescription(deletingId)}
+                    onConfirm={() => deleteMutation.mutate(deletingId)}
+                    onCancel={() => {
+                        setDeletingId(null);
+                        setDeleteError(null);
+                    }}
+                    isLoading={deleteMutation.isPending}
+                    error={deleteError}
+                />
+            )}
         </main>
     );
 }

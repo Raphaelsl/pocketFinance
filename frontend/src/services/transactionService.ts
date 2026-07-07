@@ -47,8 +47,13 @@ export const transactionService = {
   },
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  delete: async (_id: string): Promise<void> => {
-    // Implementado em SPEC-006 (C5)
-    throw new Error('Not implemented')
+  delete: async (id: string): Promise<void> => {
+    const response = await fetch(`${API_URL}/transactions/${id}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      throw new Error('Erro ao excluir transação');
+    }
   },
 }
