@@ -14,7 +14,7 @@ export const transactionService = {
     return response.json();
   },
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   getById: async (id: string): Promise<Transaction> => {
     const response = await fetch(`${API_URL}/transactions/${id}`);
     if (!response.ok) {
@@ -33,7 +33,7 @@ export const transactionService = {
     return response.json();
   },
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   update: async (id: string, data: TransactionUpdateRequest): Promise<Transaction> => {
     const response = await fetch(`${API_URL}/transactions/${id}`, {
       method: 'PUT',
@@ -46,7 +46,7 @@ export const transactionService = {
     return response.json();
   },
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   delete: async (id: string): Promise<void> => {
     const response = await fetch(`${API_URL}/transactions/${id}`, {
       method: 'DELETE',
