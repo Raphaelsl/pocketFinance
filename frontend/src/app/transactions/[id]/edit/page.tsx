@@ -37,18 +37,24 @@ export default function EditTransactionPage() {
 
     // 4. React Query:
     const mutation = useMutation({
-        mutationFn: (data: TransactionUpdateRequest) =>
-            transactionService.update(id, {
-                ...data,
-                // Converte de volta para ISO string pro backend aceitar
-                occurredAt: new Date(data.occurredAt).toISOString(),
-            }),
+        mutationFn: (data: TransactionUpdateRequest) => transactionService.update(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['transactions'] });
             router.push('/transactions');
             router.refresh();
         },
     });
+    const onSubmit = (data: TransactionUpdateRequest) => {
+        const normalizedPayload: TransactionUpdateRequest = {
+            ...data,
+            amount: Number(data.amount),
+            currency: data.currency.trim().toUpperCase(),
+            description: data.description.trim(),
+            occurredAt: new Date(data.occurredAt).toISOString(),
+        };
+
+        mutation.mutate(normalizedPayload);
+    };
 
     if (isLoading) {
         return (
@@ -79,7 +85,7 @@ export default function EditTransactionPage() {
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit((data) => mutation.mutate(data))} className="space-y-6 rounded-xl border bg-white p-6 shadow-sm">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 rounded-xl border bg-white p-6 shadow-sm">
                 {mutation.isError && (
                     <p className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                         Erro ao salvar alterações.
@@ -95,6 +101,7 @@ export default function EditTransactionPage() {
                             id="amount"
                             type="number"
                             step="0.01"
+                            {...register('amount', { valueAsNumber: true })}
                             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             {...register('amount', { required: 'Valor é obrigatório', min: { value: 0.01, message: 'Deve ser maior que zero' } })}
                         />
