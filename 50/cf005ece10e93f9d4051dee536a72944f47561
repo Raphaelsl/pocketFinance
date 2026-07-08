@@ -1,0 +1,27 @@
+tools/specs/PROJECT-VISION.md
+  s_9afc9d3db1d8e3::t_0e339bc96323c7 1-180,182-193
+  s_9afc9d3db1d8e3::t_8c84af0fbf6d05 181
+tools/specs/DOMAIN-KNOWLEDGE.md
+  s_9afc9d3db1d8e3::t_8c84af0fbf6d05 1-366
+tools/specs/PROJECT-CONTEXT.md
+  s_9afc9d3db1d8e3::t_0e339bc96323c7 9-10
+tools/specs/LEARNING-ROADMAP.md
+  s_9afc9d3db1d8e3::t_8c84af0fbf6d05 105
+  s_9afc9d3db1d8e3::t_0e339bc96323c7 102
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "50cf005ece10e93f9d4051dee536a72944f47561",
+  "prompts": {},
+  "sessions": {
+    "s_9afc9d3db1d8e3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3efb-8078-73d0-a5df-4aa47782ff42",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Jonathan Lameira <jlameira@gmail.com>"
+    }
+  }
+}
