@@ -99,8 +99,10 @@ Ver `SPEC-TRANSACTION-TYPES.md`.
 
 | Documento | Propósito |
 |-----------|-----------|
+| `PROJECT-VISION.md` | Origem, intenção e princípios humanos do projeto |
 | `PROJECT-CONTEXT.md` | Contexto atual do projeto e visão por épico |
 | `LEARNING-ROADMAP.md` | Jornada de aprendizado por competência de engenharia |
+| `DOMAIN-KNOWLEDGE.md` | Regras de domínio e semântica do sistema |
 | `PEDAGOGIA-EPICO-C.md` | Estratégia pedagógica do Épico C |
 | `SPEC-*.md` | Specs funcionais ou técnicas |
 | `asana-cards/*.md` | Descrições prontas para cards |

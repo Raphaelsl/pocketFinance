@@ -6,6 +6,8 @@ Micro-SaaS educacional com dois objetivos:
 1. **Produto real** — controle financeiro com backend, frontend e futura IA
 2. **Formação técnica** — acelerar o Dev (filho do TL) com práticas reais de engenharia
 
+**Origem e intenção do projeto:** ver `PROJECT-VISION.md`.
+
 ## Princípios
 
 - Core first (Transaction antes de Category)
