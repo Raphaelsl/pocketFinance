@@ -1,107 +1,30 @@
-"use client";
+'use client';
 
-import type { FormEvent } from 'react';
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { transactionService } from '@/services/transactionService';
-import { TransactionType } from '@/types/transaction';
-
-type FormErrors = {
-    amount: string;
-    type: string;
-    currency: string;
-    description: string;
-    occurredAt: string;
-};
-
-type FormValues = {
-    amount: string;
-    type: TransactionType;
-    currency: string;
-    description: string;
-    occurredAt: string;
-};
-
-const currencyPattern = /^[A-Z]{3}$/;
-
-function normalizeCurrency(currency: string) {
-    return currency.trim().toUpperCase();
-}
-
-function validateForm(values: FormValues): FormErrors {
-    const normalizedCurrency = normalizeCurrency(values.currency);
-    let amountError = '';
-
-    if (!values.amount.trim()) {
-        amountError = 'Valor é obrigatório';
-    } else if (!Number.isFinite(Number(values.amount)) || Number(values.amount) <= 0) {
-        amountError = 'Valor deve ser maior que zero';
-    }
-
-    return {
-        amount: amountError,
-        type: values.type ? '' : 'Tipo é obrigatório',
-        currency: currencyPattern.test(normalizedCurrency)
-            ? ''
-            : 'Moeda deve ter 3 letras (ex: BRL)',
-        description: values.description.trim() ? '' : 'Descrição é obrigatória',
-        occurredAt: values.occurredAt.trim() ? '' : 'Data é obrigatória',
-    };
-}
-
+import { useForm } from 'react-hook-form';
+import { useCreateTransaction } from '@/hooks/useTransactions';
+import { TransactionType, TransactionCreateRequest } from '@/types/transaction';
 export default function NewTransactionsPage() {
     const router = useRouter();
 
-    const [amount, setAmount] = useState<string>('');
-    const [type, setType] = useState<TransactionType>(TransactionType.EXPENSE);
-    const [currency, setCurrency] = useState<string>('BRL');
-    const [description, setDescription] = useState<string>('');
-    const [occurredAt, setOccurredAt] = useState<string>('');
-    const [errors, setErrors] = useState<FormErrors>({
-        amount: '',
-        type: '',
-        currency: '',
-        description: '',
-        occurredAt: '',
+
+    const createMutation = useCreateTransaction();
+
+
+    const { register, handleSubmit, formState: { errors } } = useForm<TransactionCreateRequest>({
+        defaultValues: {
+            type: TransactionType.EXPENSE,
+            currency: 'BRL',
+        }
     });
-    const [loading, setLoading] = useState<boolean>(false);
-    const [apiError, setApiError] = useState<string>('');
 
-    const validate = (): boolean => {
-        const values: FormValues = { amount, type, currency, description, occurredAt };
-        const newErrors = validateForm(values);
-
-        setErrors(newErrors);
-        return Object.values(newErrors).every((msg) => msg === '');
-    };
-
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setApiError('');
-
-        if (!validate()) {
-            return;
-        }
-
-        const amountValue = Number(amount);
-
-        setLoading(true);
-
-        try {
-            await transactionService.create({
-                amount: amountValue,
-                type,
-                currency: normalizeCurrency(currency),
-                description: description.trim(),
-                occurredAt: new Date(occurredAt).toISOString(),
-            });
-            router.push('/transactions');
-            router.refresh();
-        } catch (err) {
-            setApiError(err instanceof Error ? err.message : 'Erro ao criar transação');
-        } finally {
-            setLoading(false);
-        }
+    const onSubmit = (data: TransactionCreateRequest) => {
+        createMutation.mutate(data, {
+            onSuccess: () => {
+                router.push('/transactions');
+                router.refresh();
+            }
+        });
     };
 
     return (
@@ -115,10 +38,13 @@ export default function NewTransactionsPage() {
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6 rounded-xl border bg-white p-6 shadow-sm">
-                {apiError && (
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 rounded-xl border bg-white p-6 shadow-sm">
+
+
+                {createMutation.isError && (
                     <p className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                        {apiError}
+                        Erro ao criar transação. Tente novamente.
                     </p>
                 )}
 
@@ -130,16 +56,17 @@ export default function NewTransactionsPage() {
                         <input
                             id="amount"
                             type="number"
-                            inputMode="decimal"
-                            min="0"
                             step="0.01"
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            aria-invalid={Boolean(errors.amount)}
                             className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                            placeholder="0,00"
+                            placeholder="0.00"
+
+                            {...register('amount', {
+                                required: 'Valor é obrigatório',
+                                min: { value: 0.01, message: 'Valor deve ser maior que zero' },
+                                valueAsNumber: true
+                            })}
                         />
-                        {errors.amount && <p className="text-sm text-red-600">{errors.amount}</p>}
+                        {errors.amount && <p className="text-sm text-red-600">{errors.amount.message}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -148,15 +75,13 @@ export default function NewTransactionsPage() {
                         </label>
                         <select
                             id="type"
-                            value={type}
-                            onChange={(e) => setType(e.target.value as TransactionType)}
-                            aria-invalid={Boolean(errors.type)}
                             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            {...register('type', { required: 'Tipo é obrigatório' })}
                         >
                             <option value={TransactionType.EXPENSE}>EXPENSE</option>
                             <option value={TransactionType.INCOME}>INCOME</option>
                         </select>
-                        {errors.type && <p className="text-sm text-red-600">{errors.type}</p>}
+                        {errors.type && <p className="text-sm text-red-600">{errors.type.message}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -167,13 +92,14 @@ export default function NewTransactionsPage() {
                             id="currency"
                             type="text"
                             maxLength={3}
-                            value={currency}
-                            onChange={(e) => setCurrency(e.target.value)}
-                            aria-invalid={Boolean(errors.currency)}
                             className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 uppercase outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             placeholder="BRL"
+                            {...register('currency', {
+                                required: 'Moeda é obrigatória',
+                                pattern: { value: /^[A-Za-z]{3}$/, message: 'Moeda deve ter 3 letras (ex: BRL)' }
+                            })}
                         />
-                        {errors.currency && <p className="text-sm text-red-600">{errors.currency}</p>}
+                        {errors.currency && <p className="text-sm text-red-600">{errors.currency.message}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -183,12 +109,10 @@ export default function NewTransactionsPage() {
                         <input
                             id="occurredAt"
                             type="datetime-local"
-                            value={occurredAt}
-                            onChange={(e) => setOccurredAt(e.target.value)}
-                            aria-invalid={Boolean(errors.occurredAt)}
                             className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            {...register('occurredAt', { required: 'Data é obrigatória' })}
                         />
-                        {errors.occurredAt && <p className="text-sm text-red-600">{errors.occurredAt}</p>}
+                        {errors.occurredAt && <p className="text-sm text-red-600">{errors.occurredAt.message}</p>}
                     </div>
                 </div>
 
@@ -199,26 +123,23 @@ export default function NewTransactionsPage() {
                     <input
                         id="description"
                         type="text"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        aria-invalid={Boolean(errors.description)}
                         className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                        placeholder="Pagamento de serviço"
+                        placeholder="Ex: Compra no mercado"
+                        {...register('description', { required: 'Descrição é obrigatória' })}
                     />
-                    {errors.description && <p className="text-sm text-red-600">{errors.description}</p>}
+                    {errors.description && <p className="text-sm text-red-600">{errors.description.message}</p>}
                 </div>
 
                 <div className="flex items-center justify-end gap-3 border-t pt-4">
                     <button
                         type="submit"
-                        disabled={loading}
+                        disabled={createMutation.isPending}
                         className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
                     >
-                        {loading ? 'Criando...' : 'Criar transação'}
+                        {createMutation.isPending ? 'Criando...' : 'Criar transação'}
                     </button>
                 </div>
             </form>
         </main>
     );
-
 }

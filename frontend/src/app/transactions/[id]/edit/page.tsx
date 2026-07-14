@@ -6,19 +6,19 @@ import { useRouter, useParams } from 'next/navigation';
 import { transactionService } from '@/services/transactionService';
 import { TransactionUpdateRequest, TransactionType } from '@/types/transaction';
 import { useEffect } from 'react';
+import { useUpdateTransaction, transactionKeys } from '@/hooks/useTransactions';
 
 export default function EditTransactionPage() {
     const { id } = useParams<{ id: string }>();
     const router = useRouter();
-    const queryClient = useQueryClient();
 
-    // 1. React Query: Busca os dados automaticamente com cache e loading
+
     const { data: transaction, isLoading, error } = useQuery({
-        queryKey: ['transaction', id],
+        queryKey: transactionKeys.detail(id),
         queryFn: () => transactionService.getById(id),
     });
 
-    // 2. React Hook Form
+
     const { register, handleSubmit, reset, formState: { errors } } = useForm<TransactionUpdateRequest>();
 
 
@@ -29,26 +29,22 @@ export default function EditTransactionPage() {
                 type: transaction.type,
                 currency: transaction.currency,
                 description: transaction.description,
-                // Corta os segundos/fuso para o input datetime-local aceitar (YYYY-MM-DDThh:mm)
                 occurredAt: transaction.occurredAt.substring(0, 16),
             });
         }
     }, [transaction, reset]);
 
-    // 4. React Query:
-    const mutation = useMutation({
-        mutationFn: (data: TransactionUpdateRequest) =>
-            transactionService.update(id, {
-                ...data,
-                // Converte de volta para ISO string pro backend aceitar
-                occurredAt: new Date(data.occurredAt).toISOString(),
-            }),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['transactions'] });
-            router.push('/transactions');
-            router.refresh();
-        },
-    });
+
+    const updateMutation = useUpdateTransaction(id);
+    const onSubmit = (data: TransactionUpdateRequest) => {
+        updateMutation.mutate(data, {
+            onSuccess: () => {
+                router.push('/transactions');
+                router.refresh();
+            }
+        });
+    };
+
 
     if (isLoading) {
         return (
@@ -79,8 +75,8 @@ export default function EditTransactionPage() {
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit((data) => mutation.mutate(data))} className="space-y-6 rounded-xl border bg-white p-6 shadow-sm">
-                {mutation.isError && (
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 rounded-xl border bg-white p-6 shadow-sm">
+                {updateMutation.isError && (
                     <p className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                         Erro ao salvar alterações.
                     </p>
@@ -171,10 +167,10 @@ export default function EditTransactionPage() {
                     </button>
                     <button
                         type="submit"
-                        disabled={mutation.isPending}
+                        disabled={updateMutation.isPending}
                         className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
                     >
-                        {mutation.isPending ? 'Salvando...' : 'Salvar transação'}
+                        {updateMutation.isPending ? 'Salvando...' : 'Salvar transação'}
                     </button>
                 </div>
             </form>

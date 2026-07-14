@@ -1,20 +1,18 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import TransactionItem from '@/components/TransactionItem';
 
-// Importamos a interface Transaction junto com o Enum
+
 import { Transaction, TransactionType } from '../../types/transaction';
 
 describe('TransactionItem Unit Tests', () => {
-    // 1. Criamos a função mock para satisfazer a nova prop obrigatória
     const mockOnDelete = jest.fn();
 
-    // Limpa o histórico da função entre os testes
     beforeEach(() => {
         jest.clearAllMocks();
     });
 
-    it('deve renderizar os estilos corretos para uma DESPESA (EXPENSE)', () => {
+    it('deve renderizar os dados de uma DESPESA (EXPENSE) corretamente', () => {
         const mockExpense = {
             id: '1',
             amount: 150.50,
@@ -24,24 +22,15 @@ describe('TransactionItem Unit Tests', () => {
             occurredAt: '2026-06-24T14:00:00Z'
         } as Transaction;
 
-        // 2. Passamos a prop onDelete
         render(<TransactionItem transaction={mockExpense} onDelete={mockOnDelete} />);
 
-        // Verifica se a descrição renderizou
+        // Testa o que realmente importa para o usuário: o conteúdo!
         expect(screen.getByText('Compra no Mercado')).toBeInTheDocument();
-
-        // Verifica o valor e a cor da fonte (atualizado para red-600)
-        const amountElement = screen.getByText(/150,50/);
-        expect(amountElement).toBeInTheDocument();
-        expect(amountElement).toHaveClass('text-red-600');
-
-        // Verifica o badge de tipo (procura por 'Despesa' e verifica as novas classes)
-        const badgeElement = screen.getByText('Despesa');
-        expect(badgeElement).toBeInTheDocument();
-        expect(badgeElement).toHaveClass('bg-red-50', 'text-red-700');
+        expect(screen.getByText(/150,50/)).toBeInTheDocument();
+        expect(screen.getByText('Despesa')).toBeInTheDocument();
     });
 
-    it('deve renderizar os estilos corretos para uma RECEITA (INCOME)', () => {
+    it('deve renderizar os dados de uma RECEITA (INCOME) corretamente', () => {
         const mockIncome = {
             id: '2',
             amount: 5000.00,
@@ -51,19 +40,34 @@ describe('TransactionItem Unit Tests', () => {
             occurredAt: '2026-06-24T14:00:00Z'
         } as Transaction;
 
-        // 2. Passamos a prop onDelete
         render(<TransactionItem transaction={mockIncome} onDelete={mockOnDelete} />);
 
+        // Testa comportamento e dados, ignorando classes do Tailwind
         expect(screen.getByText('Salário')).toBeInTheDocument();
+        expect(screen.getByText(/5\.000,00/)).toBeInTheDocument();
+        expect(screen.getByText('Receita')).toBeInTheDocument();
+    });
 
-        // Atualizado para a cor emerald que você usou no componente
-        const amountElement = screen.getByText(/5\.000,00/);
-        expect(amountElement).toBeInTheDocument();
-        expect(amountElement).toHaveClass('text-emerald-600');
+    it('deve acionar a função onDelete com o ID da transação ao clicar no botão', () => {
+        const mockExpense = {
+            id: 'abc-123',
+            amount: 100,
+            description: 'Teste de Exclusão',
+            type: TransactionType.EXPENSE,
+            currency: 'BRL',
+            occurredAt: '2026-06-24T14:00:00Z'
+        } as Transaction;
 
-        // Verifica o badge de tipo (procura por 'Receita' e verifica as novas classes emerald)
-        const badgeElement = screen.getByText('Receita');
-        expect(badgeElement).toBeInTheDocument();
-        expect(badgeElement).toHaveClass('bg-emerald-50', 'text-emerald-700');
+        render(<TransactionItem transaction={mockExpense} onDelete={mockOnDelete} />);
+
+
+        const deleteButton = screen.getByRole('button');
+
+
+        fireEvent.click(deleteButton);
+
+
+        expect(mockOnDelete).toHaveBeenCalledTimes(1);
+        expect(mockOnDelete).toHaveBeenCalledWith('abc-123');
     });
 });
