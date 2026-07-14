@@ -91,6 +91,7 @@ export default function EditTransactionPage() {
                             id="amount"
                             type="number"
                             step="0.01"
+                            {...register('amount', { valueAsNumber: true })}
                             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             {...register('amount', { required: 'Valor é obrigatório', min: { value: 0.01, message: 'Deve ser maior que zero' } })}
                         />

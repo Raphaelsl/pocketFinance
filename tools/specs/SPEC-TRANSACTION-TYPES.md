@@ -1,4 +1,4 @@
-# SPEC-001: Add Transaction Types (INCOME/EXPENSE)
+# SPEC-TRANSACTION-TYPES: Add Transaction Types (INCOME/EXPENSE)
 
 **Status:** Ready for Planning  
 **Spec ID:** SPEC-TRANSACTION-TYPES  
@@ -454,4 +454,3 @@ Before marking this spec as DONE:
 **Version:** 1.0  
 **Last Updated:** 2026-05-02  
 **Author:** Spec Driven Development
-
