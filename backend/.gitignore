@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Local dev config (may contain credentials) ###
+application-dev.properties
