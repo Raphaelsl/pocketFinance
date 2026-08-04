@@ -1,115 +1,134 @@
-# PocketFinance — Micro SaaS for Personal Finance Management
+# PocketFinance — Personal Finance Manager
 
-PocketFinance is an educational project designed to practice full-stack software engineering using:
-
-- **Java + Spring Boot (Spring Web, Spring Data, Flyway)**
-- **PostgreSQL + Docker**
-- **React + Next.js**
-- **LLM integration for natural-language expense input**
-
-The goal of this project is to build solid engineering foundations, while creating a real product that can be showcased in a portfolio or internship application.
+PocketFinance is a full-stack Micro SaaS for personal finance management. Built as an educational project to practice real-world software engineering across the full stack.
 
 ---
 
-## 🚀 Project Status
-In development — **Sprint 1: Initial Setup (backend + infrastructure)**
+## Demo
+
+<!-- DEMO: replace the block below after recording -->
+> **How to record:** use [Kap](https://getkap.co/) (macOS) or [LICEcap](https://www.cockos.com/licecap/) to capture a short screen recording, export as GIF, and drag it into this repo via GitHub's web editor. Then replace the placeholder below.
+
+![App Demo](docs/demo.gif)
+
+<!-- Fallback screenshots while GIF is not ready -->
+### Screenshots
+
+| Transaction List | Create Transaction | Edit Transaction |
+|---|---|---|
+| ![List](docs/screenshots/list.png) | ![Create](docs/screenshots/create.png) | ![Edit](docs/screenshots/edit.png) |
+
+> Screenshots not added yet — drop PNG files in `docs/screenshots/` and they will render here automatically.
 
 ---
 
-## 📦 Tech Stack
+## Features
 
-### **Backend**
-- Java 21
-- Spring Boot 3.x
-- Spring Web
-- Spring Data JPA
-- Flyway
-- Spring Validation
-- Testcontainers (future)
-- Maven
+- List transactions with pagination
+- Create, edit and delete transactions
+- Filter by type (income / expense)
+- Responsive UI
+- LLM integration for natural-language expense input *(coming soon)*
 
-### **Frontend**
-- React + Next.js (TypeScript)
-- React Query
-- Axios
+---
 
-### **Infrastructure**
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Backend** | Java 21 + Spring Boot 3.x + Spring Data JPA + Flyway |
+| **Database** | PostgreSQL 15 (Docker) |
+| **Frontend** | Next.js 13+ (App Router) + TypeScript + Tailwind CSS |
+| **State / Forms** | React Query + React Hook Form |
+| **Infrastructure** | Docker Compose |
+
+---
+
+## Getting Started
+
+### Prerequisites
+
 - Docker + Docker Compose
-- PostgreSQL 15
-- Adminer (database UI)
-- Railway / Render / Vercel (deployment)
+- Java 21
+- Node.js 18+
 
----
-
-## 🗂 Project Structure
-pocketfinance/
-├── backend/
-│     ├── src/main/java/… (Spring Boot source code)
-│     ├── src/main/resources/db/migration/ (Flyway migrations)
-│     └── pom.xml
-│
-├── frontend/
-│     ├── pages/
-│     ├── components/
-│     └── package.json
-│
-├── docker-compose.yml
-└── README.md
-
----
-
-## 🐘 Database Setup (Docker)
-
-Start PostgreSQL and Adminer:
+### 1. Start the database
 
 ```bash
 docker compose up -d
 ```
 
-▶️ Running the Backend (development)
-Inside the backend folder:
-```
+Adminer (database UI) available at `http://localhost:8081`
+
+### 2. Run the backend
+
+```bash
+cd backend
 ./mvnw spring-boot:run
 ```
-Health check:
-`curl http://localhost:8080/health`
 
-▶️ Running the Frontend (development)
+Health check: `curl http://localhost:8080/health`
 
-```
+### 3. Run the frontend
+
+```bash
+cd frontend
 npm install
 npm run dev
 ```
 
-Visit:
-`http://localhost:3000`
+App available at `http://localhost:3000`
 
-📌 Git Workflow
-1.	Create a new branch from main
-2.	Make small, focused commits
-3.	Open a Pull Request targeting main
-4.	Request review (1 reviewer minimum)
-5.	After approval → Squash & Merge
+### Environment variables
 
-🧪 Testing (future)
-•	Integration tests using Testcontainers
-•	Basic unit tests for services and controllers
+Copy `.env.example` to `.env` and fill in the values if you want to override the defaults:
 
-🤖 LLM Integration (future)
-
-The endpoint /api/parse-text will accept natural language inputs such as:
-
-“I spent 45 dollars at the grocery store yesterday.”
-
-Expected JSON output:
-```Json
-{
-  "amount": 45,
-  "category": "Grocery",
-  "occurred_at": "2024-03-10"
-}
+```bash
+cp .env.example .env
 ```
 
-👥 Authors
-•	Jonathan Lameira — Tech Lead - @jlameira
-•	Raphael Lameira — Developer - @Raphaelsl
+| Variable | Default | Description |
+|---|---|---|
+| `POSTGRES_PASSWORD` | `pocketpass` | PostgreSQL container password |
+| `DB_PASSWORD` | `pocketpass` | Password used by the Spring Boot app |
+
+---
+
+## Project Structure
+
+```
+pocketfinance/
+├── backend/
+│   ├── src/main/java/…          # Spring Boot source
+│   ├── src/main/resources/
+│   │   ├── application.yml
+│   │   └── db/migration/        # Flyway migrations
+│   └── pom.xml
+├── frontend/
+│   ├── src/app/                 # Next.js App Router pages
+│   ├── src/components/
+│   └── src/services/
+├── docs/
+│   ├── demo.gif                 # ← drop your GIF here
+│   └── screenshots/             # ← drop PNGs here
+├── docker-compose.yml
+└── .env.example
+```
+
+---
+
+## Roadmap
+
+- [x] Epic A — Setup & Infrastructure
+- [x] Epic B — Backend CRUD (Transaction)
+- [x] Epic C — Frontend + Integration
+- [ ] Epic D — Dashboard & Aggregations
+- [ ] Epic E — LLM Integration
+- [ ] Epic F — Deploy & Productionization
+
+---
+
+## Authors
+
+- **Jonathan Lameira** — Tech Lead · [@jlameira](https://github.com/jlameira)
+- **Raphael Lameira** — Developer · [@Raphaelsl](https://github.com/Raphaelsl)
