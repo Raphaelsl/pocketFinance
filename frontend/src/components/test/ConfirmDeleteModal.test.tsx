@@ -1,17 +1,17 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { ConfirmDeleteModal } from '../ConfirmDeleteModal'; // Caminho relativo para o componente
+import { ConfirmDeleteModal } from '../ConfirmDeleteModal';
 
-describe('ConfirmDeleteModal', () => {
-    // Funções falsas (mocks) para sabermos se os botões foram clicados
+describe('ConfirmDeleteModal Acessibilidade e Comportamento', () => {
     const mockOnConfirm = jest.fn();
     const mockOnCancel = jest.fn();
 
     beforeEach(() => {
-        jest.clearAllMocks(); // Limpa o histórico de cliques antes de cada teste
+        jest.clearAllMocks();
     });
 
-    it('deve renderizar a descrição da transação corretamente', () => {
+
+    it('deve renderizar o modal com semântica correta de dialog (a11y)', () => {
         render(
             <ConfirmDeleteModal
                 description="Compra no Mercado"
@@ -22,9 +22,30 @@ describe('ConfirmDeleteModal', () => {
             />
         );
 
-        // Verifica se o texto principal e o nome da transação aparecem na tela
-        expect(screen.getByText(/Tem certeza que deseja excluir/i)).toBeInTheDocument();
-        expect(screen.getByText(/Compra no Mercado/i)).toBeInTheDocument();
+
+        const dialog = screen.getByRole('dialog', { name: /excluir transação/i });
+        expect(dialog).toBeInTheDocument();
+        expect(dialog).toHaveAttribute('aria-modal', 'true');
+
+
+        expect(dialog).toHaveAccessibleDescription(/Tem certeza que deseja excluir Compra no Mercado\s*\? Esta ação não pode ser desfeita\./i);
+    });
+
+    it('deve chamar onCancel ao pressionar a tecla Escape', () => {
+        render(
+            <ConfirmDeleteModal
+                description="Teste"
+                onConfirm={mockOnConfirm}
+                onCancel={mockOnCancel}
+                isLoading={false}
+                error={null}
+            />
+        );
+
+        // Simula o pressionamento da tecla Escape no teclado
+        fireEvent.keyDown(document, { key: 'Escape' });
+
+        expect(mockOnCancel).toHaveBeenCalledTimes(1);
     });
 
     it('deve chamar onCancel ao clicar no botão Cancelar', () => {
@@ -41,7 +62,6 @@ describe('ConfirmDeleteModal', () => {
         const btnCancel = screen.getByRole('button', { name: /cancelar/i });
         fireEvent.click(btnCancel);
 
-        // Verifica se a função foi disparada 1 vez
         expect(mockOnCancel).toHaveBeenCalledTimes(1);
     });
 
@@ -59,7 +79,6 @@ describe('ConfirmDeleteModal', () => {
         const btnConfirm = screen.getByRole('button', { name: 'Excluir' });
         fireEvent.click(btnConfirm);
 
-        // Verifica se a função de deletar foi disparada 1 vez
         expect(mockOnConfirm).toHaveBeenCalledTimes(1);
     });
 
@@ -75,14 +94,14 @@ describe('ConfirmDeleteModal', () => {
         );
 
         const btnCancel = screen.getByRole('button', { name: /cancelar/i });
-        // Quando está carregando, o texto do botão muda para "Excluindo..."
         const btnConfirm = screen.getByRole('button', { name: /excluindo\.\.\./i });
 
         expect(btnCancel).toBeDisabled();
         expect(btnConfirm).toBeDisabled();
     });
 
-    it('deve exibir a mensagem de erro quando houver falha', () => {
+    // Subtask 5: Busca o alerta pelo seu role de acessibilidade
+    it('deve exibir a mensagem de erro em um container de alerta (role="alert")', () => {
         render(
             <ConfirmDeleteModal
                 description="Teste"
@@ -93,7 +112,9 @@ describe('ConfirmDeleteModal', () => {
             />
         );
 
-        // Garante que o box vermelho de erro vai aparecer
-        expect(screen.getByText('Erro de conexão com o banco')).toBeInTheDocument();
+        // Garante que a mensagem não é apenas um texto visual, mas um alerta para o leitor de tela
+        const alert = screen.getByRole('alert');
+        expect(alert).toBeInTheDocument();
+        expect(alert).toHaveTextContent('Erro de conexão com o banco');
     });
 });
