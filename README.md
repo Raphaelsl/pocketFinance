@@ -6,19 +6,7 @@ PocketFinance is a full-stack Micro SaaS for personal finance management. Built 
 
 ## Demo
 
-<!-- DEMO: replace the block below after recording -->
-> **How to record:** use [Kap](https://getkap.co/) (macOS) or [LICEcap](https://www.cockos.com/licecap/) to capture a short screen recording, export as GIF, and drag it into this repo via GitHub's web editor. Then replace the placeholder below.
-
-![App Demo](docs/demo.gif)
-
-<!-- Fallback screenshots while GIF is not ready -->
-### Screenshots
-
-| Transaction List | Create Transaction | Edit Transaction |
-|---|---|---|
-| ![List](docs/screenshots/list.png) | ![Create](docs/screenshots/create.png) | ![Edit](docs/screenshots/edit.png) |
-
-> Screenshots not added yet — drop PNG files in `docs/screenshots/` and they will render here automatically.
+![App Demo](docs/screenshots/pocket-finance-initial.gif)
 
 ---
 
@@ -109,8 +97,8 @@ pocketfinance/
 │   ├── src/components/
 │   └── src/services/
 ├── docs/
-│   ├── demo.gif                 # ← drop your GIF here
-│   └── screenshots/             # ← drop PNGs here
+│   └── screenshots/
+│       └── pocket-finance-initial.gif
 ├── docker-compose.yml
 └── .env.example
 ```
