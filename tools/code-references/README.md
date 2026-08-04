@@ -53,6 +53,7 @@ tools/code-references/
 ├── SPEC-004-CreateTransactionPage.tsx
 │
 ├── (SPEC-005 e SPEC-006: em desenvolvimento)
+├── SPEC-007-post-c-code-quality-reference.md
 └── README.md (este arquivo)
 ```
 
@@ -130,6 +131,13 @@ Exemplo:
 1. useMutation (aprendido em C4, reutiliza)
 2. Modal confirmação
 3. Consolidação de padrões
+
+### SPEC-007 (Pos-C Quality)
+
+1. Comparar pages atuais com hooks de dominio
+2. Normalizar payloads create/edit
+3. Revisar acessibilidade do modal
+4. Ajustar testes para comportamento, nao classes CSS
 
 ---
 

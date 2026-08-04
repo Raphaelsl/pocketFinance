@@ -101,9 +101,9 @@ Esse fluxo ainda não está implementado. Ele pertence à fase futura de
 |-------|-------------|--------|----------|
 | A | Foundation Engineering | Concluído | Setup, repo, Docker, Postgres, Spring Boot, Flyway |
 | B | Backend Engineering | Concluído | CRUD real com DTOs, service layer, repository, pagination e testes |
-| C | Frontend Engineering | Em andamento | Next.js, React, TypeScript, forms, API integration e React Query |
-| Pós-C | Architecture & Code Quality | Planejado | Refatorar padrões, melhorar testes, acessibilidade e boundaries |
-| D | Product Engineering | Planejado | Dashboard, KPIs, filtros, UX e analytics |
+| C | Frontend Engineering | Concluído | Next.js, React, TypeScript, forms, API integration e React Query |
+| Pós-C | Architecture & Code Quality | Em andamento | Refatorar padrões, melhorar testes, acessibilidade e boundaries |
+| D | Product Engineering | Spec preparada | Dashboard, KPIs, filtros, UX e analytics |
 | E | AI Engineering | Planejado | Parsing por linguagem natural, categorização e assistente financeiro |
 | F | Platform Engineering | Planejado | Deploy, CI/CD, ambientes, logs e observabilidade |
 

@@ -24,8 +24,9 @@ Micro-SaaS educacional com dois objetivos:
 |-------|------|--------|
 | A | Setup & Infraestrutura | ✅ Concluído |
 | B | Backend CRUD (Transaction) | ✅ Concluído |
-| C | Frontend (Next.js) + Integração | 🚧 Em andamento |
-| D | Dashboard & Aggregations | ⏳ Futuro |
+| C | Frontend (Next.js) + Integração | ✅ Concluído |
+| Pós-C | Architecture & Code Quality | 🚧 Em andamento |
+| D | Dashboard & Aggregations | 📝 Spec e cards preparados |
 | E | LLM Integration | ⏳ Futuro |
 | F | Deploy & Productionization | ⏳ Futuro |
 
@@ -66,7 +67,7 @@ Micro-SaaS educacional com dois objetivos:
 
 **📖 Estratégia Pedagógica:** Abordagem progressiva "sentir dor → aprender solução". Ver `PEDAGOGIA-EPICO-C.md` para detalhes de cada spike.
 
-## Épico C — Frontend Next.js + Integração 🚧
+## Épico C — Frontend Next.js + Integração ✅
 
 ### Subépicos planejados
 | ID | Escopo | Abordagem |
@@ -114,7 +115,7 @@ A progressão C1 → C2 → C3 → C4 → C5 é **intencional e pedagógica**.
 
 **Backend:** fluxo HTTP, Controller → Service → Repository, DTO, paginação, Specification, PRs, logs
 
-**Frontend:** em andamento no Épico C. O Dev já está praticando Next.js, React, TypeScript,
+**Frontend:** Épico C concluído. O Dev já praticou Next.js, React, TypeScript,
 React Query, React Hook Form, testes de componentes e integração com backend.
 
 ---
@@ -136,16 +137,44 @@ React Query, React Hook Form, testes de componentes e integração com backend.
 
 ## Próxima fase após Épico C
 
-Após C5 estar funcionando e com testes verdes, abrir uma fase curta de
-**Architecture & Code Quality**. Essa fase não deve bloquear o aprendizado inicial
-de React; ela existe para consolidar padrões depois que a repetição ficou visível.
+Como C5 já está funcionando, abrir uma fase curta de **Architecture & Code Quality**.
+Essa fase não deve virar produto novo; ela existe para consolidar padrões depois
+que a repetição ficou visível.
 
-Assuntos previstos:
-- hooks de domínio (`useDeleteTransaction`, `useUpdateTransaction`) quando fizerem sentido
-- normalização consistente de payloads create/edit
-- testes menos acoplados a classes CSS
-- acessibilidade de modal
-- limpeza de comentários e `eslint-disable` obsoletos
+Tasks planejadas:
+- PC1 — Architecture baseline review
+- PC2 — Domain hooks e boundaries de React Query
+- PC3 — Normalização de payloads e contrato do service
+- PC4 — Acessibilidade de modal e forms
+- PC5 — Test cleanup e quality gate
+
+Referência principal: `SPEC-007-post-c-architecture-code-quality.md`.
+
+## Épico D — Dashboard & Aggregations
+
+O Épico D está especificado, mas continua bloqueado pela conclusão de PC5.
+
+Objetivo: transformar as transações existentes em informação financeira útil sem
+criar uma segunda fonte de verdade.
+
+Cards planejados:
+
+- D1 — Dashboard Aggregation API
+- D2 — Dashboard Shell & KPI Summary
+- D3 — Period & Currency Filters
+- D4 — Expense Category Breakdown
+- D5 — Monthly Financial Evolution
+- D6 — Dashboard Quality Gate
+
+Decisões fechadas para o primeiro dashboard:
+
+- Um endpoint composto: `GET /api/dashboard`.
+- Agregações executadas no backend e no banco, nunca sobre a página atual do frontend.
+- Uma moeda por consulta; sem conversão cambial.
+- Período máximo de 12 meses.
+- Sem nova tabela, cache ou biblioteca de gráficos.
+
+Referência principal: `SPEC-008-epic-d-dashboard-aggregations.md`.
 
 ## Convenções
 
