@@ -1,0 +1,20 @@
+README.md
+  s_684b04f85571fc::t_c22660acf5711f 100-101
+  s_684b04f85571fc::t_20d7227a05828a 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ce34702b190469d32c1aea6cbd84112bd5bf778e",
+  "prompts": {},
+  "sessions": {
+    "s_684b04f85571fc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "be8c3da9-f355-43bb-a0ca-efa75f106920",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Jonathan Lameira <jlameira@gmail.com>"
+    }
+  }
+}
