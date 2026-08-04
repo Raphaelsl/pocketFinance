@@ -46,11 +46,13 @@ describe('NewTransactionsPage Unit Tests', () => {
         (transactionService.create as jest.Mock).mockResolvedValue({});
         const { container } = renderWithQueryClient(<NewTransactionsPage />);
 
+        // Simulando a digitação no input (o HTML sempre trata valores como string)
         fireEvent.change(screen.getByLabelText(/valor/i), { target: { value: '150.50' } });
 
-
+        // Simulando a digitação da moeda com espaços indesejados e em minúsculo
         fireEvent.change(screen.getByLabelText(/moeda/i), { target: { value: 'usd' } });
 
+        // Simulando a digitação da descrição com espaços sobrando
         fireEvent.change(screen.getByLabelText(/descr/i), {
             target: { value: ' Projeto Freelance ' },
         });
@@ -58,6 +60,7 @@ describe('NewTransactionsPage Unit Tests', () => {
         const dateInput = container.querySelector('input[type="datetime-local"]');
         expect(dateInput).not.toBeNull();
         fireEvent.change(dateInput!, { target: { value: '2026-06-24T14:30' } });
+
         fireEvent.change(screen.getByRole('combobox'), {
             target: { value: TransactionType.INCOME },
         });
@@ -65,6 +68,7 @@ describe('NewTransactionsPage Unit Tests', () => {
         fireEvent.click(screen.getByRole('button', { name: /Criar trans/i }));
 
         await waitFor(() => {
+
             expect(transactionService.create).toHaveBeenCalledWith({
                 amount: 150.5,
                 type: TransactionType.INCOME,
@@ -73,6 +77,7 @@ describe('NewTransactionsPage Unit Tests', () => {
                 occurredAt: expect.any(String),
             });
         });
+
         expect(mockPush).toHaveBeenCalledWith('/transactions');
         expect(mockRefresh).toHaveBeenCalled();
     });
