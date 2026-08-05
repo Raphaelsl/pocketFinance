@@ -1,0 +1,26 @@
+tools/specs/LEARNING-ROADMAP.md
+  s_8f37625a6cf8ad::t_be1602dbc3c915 32,34-35
+  s_8f37625a6cf8ad::t_4546672391e39a 23-24
+tools/specs/asana-cards/CARD-E5-frontend-natural-language.md
+  s_8f37625a6cf8ad::t_8c8aea9c87bfe7 35-38
+tools/specs/SPEC-009-epic-e-ai-engineering.md
+  s_8f37625a6cf8ad::t_0a287e8ecbf8d4 240,244-246
+tools/specs/PROJECT-CONTEXT.md
+  s_8f37625a6cf8ad::t_935edd0e27baa9 28-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "cbb2596a0ad5eea2436ee2ee29f40e7a908b1ad2",
+  "prompts": {},
+  "sessions": {
+    "s_8f37625a6cf8ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "469b106e-2149-4853-9b48-919dc4b0b748",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Jonathan Lameira <jlameira@gmail.com>"
+    }
+  }
+}
