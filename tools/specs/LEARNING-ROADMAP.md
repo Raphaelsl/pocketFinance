@@ -103,6 +103,34 @@ Pergunta pedagógica:
 
 ---
 
+## Épico E: AI Engineering
+
+O Épico E forma o Dev como AI Engineer — não apenas alguém que chama uma API,
+mas alguém que projeta software confiável com IA como componente.
+
+Stack: Spring AI + OpenAI (GPT-4o mini) + input de texto livre no frontend.
+
+A progressão pedagógica é a mesma do Épico C: sentir o problema antes de aprender a solução.
+
+| Card | Spec | Módulo | Intenção pedagógica |
+|------|------|--------|---------------------|
+| E1 | `SPEC-009` | Integration | Fazer a primeira chamada e sentir o problema do texto livre |
+| E2 | `SPEC-009` | Integration | Structured Output resolve parsing, mas LLM viola regras de domínio |
+| E3 | `SPEC-009` | Workflows + Reliability | Validação pós-LLM e workflow de dois passos (sugerir → confirmar) |
+| E4 | `SPEC-009` | Reliability | Fallbacks, observabilidade de custo e guardrails de input |
+| E5 | `SPEC-009` | AI Product | Frontend: input de texto pré-preenche o formulário existente |
+| E6 | `SPEC-009` | Reliability | Quality gate: testes sem chamada real à OpenAI |
+
+Spec principal: `SPEC-009-epic-e-ai-engineering.md`.
+
+Pergunta pedagógica:
+
+> "Você sabe fazer o LLM devolver um JSON. O que acontece quando ele devolve
+> `amount: -50`? E quando a OpenAI fica fora por 2 minutos? E quanto custou
+> cada chamada que você fez essa semana?"
+
+---
+
 ## Decisão de Domínio que Afeta as Próximas Fases
 
 O projeto evoluiu de `Transaction.amount` sozinho para:

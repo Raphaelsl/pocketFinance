@@ -150,6 +150,28 @@ Tasks planejadas:
 
 Referência principal: `SPEC-007-post-c-architecture-code-quality.md`.
 
+## Épico E — AI Engineering
+
+O Épico E introduz entrada por linguagem natural e forma o Dev em AI Engineering.
+
+Objetivo: o usuário descreve uma transação em texto livre e o sistema gera uma
+sugestão estruturada para confirmação humana.
+
+Stack: Spring AI + OpenAI (GPT-4o mini) + frontend com input de texto livre.
+
+Cards planejados:
+
+- E1 — Spring AI Setup + First Call
+- E2 — Structured Output: TransactionSuggestionResult
+- E3 — Suggest Workflow, Validation & API
+- E4 — Fallbacks, Observability & Guardrails
+- E5 — Frontend: Natural Language Input UI
+- E6 — AI Quality Gate
+
+Referência principal: `SPEC-009-epic-e-ai-engineering.md`.
+
+---
+
 ## Épico D — Dashboard & Aggregations
 
 O Épico D está especificado, mas continua bloqueado pela conclusão de PC5.
