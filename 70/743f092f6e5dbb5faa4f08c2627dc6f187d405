@@ -1,0 +1,35 @@
+tools/specs/asana-cards/CARD-E2-structured-output.md
+  s_8f37625a6cf8ad::t_d5a09bf2d201a6 1-75
+tools/specs/asana-cards/CARD-E5-frontend-natural-language.md
+  s_8f37625a6cf8ad::t_c3dbcb050f12b8 1-80
+tools/specs/asana-cards/CARD-E6-ai-quality-gate.md
+  s_8f37625a6cf8ad::t_8569a0cf76a4e2 1-88
+tools/specs/PROJECT-CONTEXT.md
+  s_8f37625a6cf8ad::t_3f0457e7a0a37d 153-174
+tools/specs/SPEC-009-epic-e-ai-engineering.md
+  s_8f37625a6cf8ad::t_e66e41303f10fb 1-701
+tools/specs/asana-cards/CARD-E1-spring-ai-setup.md
+  s_8f37625a6cf8ad::t_8c171f8723a4aa 1-73
+tools/specs/asana-cards/CARD-E3-suggest-workflow.md
+  s_8f37625a6cf8ad::t_f4071c2d8bf173 1-97
+tools/specs/asana-cards/CARD-E4-reliability-observability.md
+  s_8f37625a6cf8ad::t_d45eb5b744fbb7 1-77
+tools/specs/LEARNING-ROADMAP.md
+  s_8f37625a6cf8ad::t_b89b5dd8ec3bb6 106-133
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "70743f092f6e5dbb5faa4f08c2627dc6f187d405",
+  "prompts": {},
+  "sessions": {
+    "s_8f37625a6cf8ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "469b106e-2149-4853-9b48-919dc4b0b748",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Jonathan Lameira <jlameira@gmail.com>"
+    }
+  }
+}
