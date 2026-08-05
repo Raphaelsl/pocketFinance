@@ -3,6 +3,7 @@ import { transactionService } from '@/services/transactionService';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {TransactionCreateRequest, TransactionUpdateRequest} from '@/types/transaction';
 
+
 //dicionario
 export const transactionKeys = {
     all: ['transactions'],
@@ -10,13 +11,17 @@ export const transactionKeys = {
     detail: (id: string) => ['transactions', 'detail', id],
 };
 
-export const normalizeTransactionPayload = (data: TransactionUpdateRequest) => ({
-    ...data,
-    amount: Number(data.amount),
-    currency: data.currency.trim().toUpperCase(),
-    description: data.description.trim(),
-    occurredAt: new Date(data.occurredAt).toISOString(),
-});
+export const normalizeTransactionPayload = (
+    data: TransactionCreateRequest | TransactionUpdateRequest
+) => {
+    return {
+        ...data,
+        amount: Number(data.amount),
+        currency: data.currency.trim().toUpperCase(),
+        description: data.description.trim(),
+        occurredAt: new Date(data.occurredAt).toISOString(),
+    };
+};
 
 export function useTransactions(page: number) {
     const { data, isLoading, isError } = useQuery({

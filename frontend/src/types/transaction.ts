@@ -28,7 +28,7 @@ export interface PagedResponse<T> {
 }
 
 export interface TransactionCreateRequest {
-  amount: number
+  amount: number | string;
   type: TransactionType
   currency: string
   description: string

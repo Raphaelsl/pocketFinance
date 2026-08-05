@@ -63,7 +63,6 @@ export default function NewTransactionsPage() {
                             {...register('amount', {
                                 required: 'Valor é obrigatório',
                                 min: { value: 0.01, message: 'Valor deve ser maior que zero' },
-                                valueAsNumber: true
                             })}
                         />
                         {errors.amount && <p className="text-sm text-red-600">{errors.amount.message}</p>}
