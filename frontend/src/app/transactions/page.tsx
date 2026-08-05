@@ -1,18 +1,15 @@
 'use client';
 
 import {useState} from 'react';
-import {useMutation, useQueryClient} from '@tanstack/react-query';
-import { transactionService } from '@/services/transactionService';
+import { useTransactions, useDeleteTransaction } from "@/hooks/useTransactions";
 import { ConfirmDeleteModal } from '@/components/ConfirmDeleteModal';
 import TransactionItem from '@/components/TransactionItem';
 import Button from "@/components/Button";
-import {useTransactions} from "@/hooks/useTransactions";
 import Link from "next/link";
 
 
 
 export default function TransactionsPage() {
-    const queryClient = useQueryClient();
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [deleteError, setDeleteError] = useState<string | null>(null);
     // A tela só controla em qual página estamos
@@ -21,18 +18,21 @@ export default function TransactionsPage() {
     // Puxa os dados Custom Hook
     const {transactions, loading, error, totalPages} = useTransactions(page);
 
-    const deleteMutation = useMutation({
-        mutationFn: (id: string) => transactionService.delete(id),
-        onSuccess: () => {
-            // Atualiza a lista na tela automaticamente
-            queryClient.invalidateQueries({ queryKey: ['transactions'] });
-            setDeletingId(null); // Fecha o modal
-            setDeleteError(null);
-        },
-        onError: (err: Error) => {
-            setDeleteError(err.message);
-        },
-    });
+    const deleteMutation = useDeleteTransaction();
+
+    const handleDeleteConfirm = () => {
+        if (!deletingId) return;
+
+        deleteMutation.mutate(deletingId, {
+            onSuccess: () => {
+                setDeletingId(null);
+                setDeleteError(null);
+            },
+            onError: (err: Error) => {
+                setDeleteError(err.message);
+            }
+        });
+    };
 
     const getTransactionDescription = (id: string) => {
         return transactions.find((t) => t.id === id)?.description ?? '';
@@ -122,7 +122,7 @@ export default function TransactionsPage() {
             {deletingId && (
                 <ConfirmDeleteModal
                     description={getTransactionDescription(deletingId)}
-                    onConfirm={() => deleteMutation.mutate(deletingId)}
+                    onConfirm={handleDeleteConfirm}
                     onCancel={() => {
                         setDeletingId(null);
                         setDeleteError(null);

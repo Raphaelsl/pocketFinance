@@ -10,7 +10,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/pocketdb
     username: pocket
-    password: pocketpass
+    password: ${DB_PASSWORD:pocketpass}
   jpa:
     hibernate:
       ddl-auto: none
