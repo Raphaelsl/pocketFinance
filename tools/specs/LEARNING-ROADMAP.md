@@ -20,8 +20,8 @@ continuam nos arquivos `SPEC-*.md`.
 | 1 | Foundation Engineering | Épico A | Concluído | Projeto, repo, infra local, Docker, Postgres, Flyway e Spring Boot básico |
 | 2 | Backend Engineering | Épico B | Concluído | API CRUD de transações com DTOs, service layer, repository, paginação e testes |
 | 3 | Frontend Engineering | Épico C | Concluído | UI Next.js consumindo o CRUD do backend |
-| 4 | Architecture & Code Quality | Pós-C | Em andamento | Refatorar padrões repetidos, melhorar testes, acessibilidade e boundaries |
-| 5 | Product Engineering | Épico D | Planejado | Dashboard, analytics, UX e KPIs financeiros |
+| 4 | Architecture & Code Quality | Pós-C | Concluído | Refatorar padrões repetidos, melhorar testes, acessibilidade e boundaries |
+| 5 | Product Engineering | Épico D | Em andamento | Dashboard, analytics, UX e KPIs financeiros |
 | 6 | AI Engineering | Épico E | Planejado | Parsing de transações em linguagem natural, categorização e fluxos assistidos |
 | 7 | Platform Engineering | Épico F | Planejado | Deploy, CI/CD, ambientes, logs e observabilidade |
 
@@ -29,13 +29,10 @@ continuam nos arquivos `SPEC-*.md`.
 
 ## Fase Atual
 
-**Fase atual:** Architecture & Code Quality / Pós-C
+**Fase atual:** Product Engineering / Épico D
 
-Objetivo atual:
-
-- Consolidar o CRUD frontend depois do Épico C.
-- Extrair padrões que ficaram repetidos em React Query, forms e services.
-- Melhorar testes, acessibilidade e boundaries antes do Épico D.
+Pós-C concluído. Padrões consolidados, testes e boundaries revisados.
+O Dev entra agora no Épico D com uma base limpa para construir o dashboard.
 
 Trilha concluída do Épico C:
 

@@ -32,7 +32,10 @@ normally. The manual form must always remain accessible.
 - [ ] On 503: show red banner "Serviço indisponível. Use o formulário abaixo."; form stays usable
 - [ ] On confirmation: POST /api/transactions payload includes metadata
       { source: "LLM", model: "gpt-4o-mini", rawInput: "...", confidence: "..." }
-- [ ] metadata is assembled in transactionService.ts — invisible to the user
+- [ ] metadata is assembled as a JSON.stringify'd string in transactionService.ts — the
+      backend TransactionCreateRequest accepts metadata as String, not a JSON object
+      Example: metadata: JSON.stringify({ source: "LLM", model: "gpt-4o-mini", rawInput, confidence })
+- [ ] The existing TransactionCreateRequest type already has metadata?: string | null — no type change needed
 - [ ] Component tests cover: idle, loading, success HIGH, success LOW, PARSING_FAILED, 503
 - [ ] Tests query elements by role and label — no CSS class coupling
 

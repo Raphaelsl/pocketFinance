@@ -25,9 +25,9 @@ Micro-SaaS educacional com dois objetivos:
 | A | Setup & Infraestrutura | ✅ Concluído |
 | B | Backend CRUD (Transaction) | ✅ Concluído |
 | C | Frontend (Next.js) + Integração | ✅ Concluído |
-| Pós-C | Architecture & Code Quality | 🚧 Em andamento |
-| D | Dashboard & Aggregations | 📝 Spec e cards preparados |
-| E | LLM Integration | ⏳ Futuro |
+| Pós-C | Architecture & Code Quality | ✅ Concluído |
+| D | Dashboard & Aggregations | 🚧 Em andamento |
+| E | AI Engineering | 📝 Spec e cards preparados |
 | F | Deploy & Productionization | ⏳ Futuro |
 
 **Roadmap por competências:** ver `LEARNING-ROADMAP.md`.

@@ -237,13 +237,13 @@ Content-Type: application/json
   "currency": "BRL",
   "description": "Mercado",
   "occurredAt": "2026-08-04T00:00:00Z",
-  "metadata": {
-    "source": "LLM",
-    "model": "gpt-4o-mini",
-    "rawInput": "Gastei R$ 150 no mercado ontem.",
-    "confidence": "HIGH"
-  }
+  "metadata": "{\"source\":\"LLM\",\"model\":\"gpt-4o-mini\",\"rawInput\":\"Gastei R$ 150 no mercado ontem.\",\"confidence\":\"HIGH\"}"
 }
+```
+
+`metadata` é enviado como `String` (JSON stringificado) porque `TransactionCreateRequest`
+aceita `String metadata` — o campo já existe no backend e no tipo frontend (`metadata?: string | null`).
+O frontend serializa o objeto com `JSON.stringify()` antes de enviar.
 ```
 
 ---
