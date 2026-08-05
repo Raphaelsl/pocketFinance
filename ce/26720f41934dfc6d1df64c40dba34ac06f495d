@@ -1,0 +1,19 @@
+.gitignore
+  s_8f37625a6cf8ad::t_b457dbac535d03 30-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ce26720f41934dfc6d1df64c40dba34ac06f495d",
+  "prompts": {},
+  "sessions": {
+    "s_8f37625a6cf8ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "469b106e-2149-4853-9b48-919dc4b0b748",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Jonathan Lameira <jlameira@gmail.com>"
+    }
+  }
+}
