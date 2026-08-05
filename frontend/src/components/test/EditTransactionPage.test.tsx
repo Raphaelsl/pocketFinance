@@ -6,12 +6,10 @@ import { transactionService } from '../../services/transactionService';
 import { useRouter, useParams } from 'next/navigation';
 import { TransactionType } from '../../types/transaction';
 
-
 jest.mock('next/navigation', () => ({
     useRouter: jest.fn(),
     useParams: jest.fn(),
 }));
-
 
 jest.mock('../../services/transactionService', () => ({
     transactionService: {
@@ -20,11 +18,10 @@ jest.mock('../../services/transactionService', () => ({
     },
 }));
 
-describe('EditTransactionPage', () => {
+describe('EditTransactionPage Behavior & A11y', () => {
     let queryClient: QueryClient;
     const mockRouterPush = jest.fn();
 
-    // Uma transação falsa para o nosso mock devolver
     const mockTransaction = {
         id: '123',
         amount: 150.5,
@@ -35,20 +32,15 @@ describe('EditTransactionPage', () => {
     };
 
     beforeEach(() => {
-        // Limpa os mocks antes de cada teste
         jest.clearAllMocks();
-
-        // Cria um QueryClient novo e zerado para cada teste não influenciar o outro
         queryClient = new QueryClient({
-            defaultOptions: { queries: { retry: false } }, // Desliga as retentativas no teste
+            defaultOptions: { queries: { retry: false } },
         });
 
-        // Configura os mocks do Next.js
         (useRouter as jest.Mock).mockReturnValue({ push: mockRouterPush, refresh: jest.fn() });
         (useParams as jest.Mock).mockReturnValue({ id: '123' });
     });
 
-    // Função auxiliar para renderizar a página dentro do Provedor do React Query
     const renderPage = () => {
         render(
             <QueryClientProvider client={queryClient}>
@@ -57,56 +49,48 @@ describe('EditTransactionPage', () => {
         );
     };
 
-    it('deve mostrar mensagem de carregamento inicialmente', () => {
-        // Configuramos o mock para demorar um pouco (simulando internet)
+    it('deve exibir feedback de carregamento acessível (role="status") inicialmente', () => {
         (transactionService.getById as jest.Mock).mockReturnValue(new Promise(() => {}));
-
         renderPage();
 
-        expect(screen.getByText('Carregando transação...')).toBeInTheDocument();
+        const statusElement = screen.getByRole('status');
+        expect(statusElement).toBeInTheDocument();
+        expect(statusElement).toHaveTextContent(/carregando/i);
     });
 
-    it('deve preencher o formulário com os dados da transação', async () => {
-        // O mock agora devolve nossa transação falsa rapidamente
+    it('deve preencher o formulário corretamente baseado nos dados carregados', async () => {
         (transactionService.getById as jest.Mock).mockResolvedValue(mockTransaction);
-
         renderPage();
 
-        // Esperamos o React Query terminar e a tela carregar
         await waitFor(() => {
-            expect(screen.getByDisplayValue('150.5')).toBeInTheDocument(); // amount
-            expect(screen.getByDisplayValue('EXPENSE')).toBeInTheDocument(); // type
-            expect(screen.getByDisplayValue('BRL')).toBeInTheDocument(); // currency
-            expect(screen.getByDisplayValue('Compra no mercado')).toBeInTheDocument(); // description
+            expect(screen.getByLabelText(/valor/i)).toHaveValue(150.5);
+            expect(screen.getByLabelText(/tipo/i)).toHaveValue('EXPENSE');
+            expect(screen.getByLabelText(/moeda/i)).toHaveValue('BRL');
+            expect(screen.getByLabelText(/descrição/i)).toHaveValue('Compra no mercado');
         });
     });
 
-    it('deve enviar os dados atualizados ao salvar', async () => {
+    it('deve formatar e enviar o payload correto ao salvar alterações', async () => {
         (transactionService.getById as jest.Mock).mockResolvedValue(mockTransaction);
         (transactionService.update as jest.Mock).mockResolvedValue({});
 
         renderPage();
 
-        // Espera carregar os dados
         await waitFor(() => {
-            expect(screen.getByDisplayValue('Compra no mercado')).toBeInTheDocument();
+            expect(screen.getByLabelText(/descrição/i)).toHaveValue('Compra no mercado');
         });
 
-        // Altera a descrição simulando o usuário digitando
-        const descriptionInput = screen.getByLabelText('Descrição');
+        const descriptionInput = screen.getByLabelText(/descrição/i);
         fireEvent.change(descriptionInput, { target: { value: 'Compra no shopping' } });
 
-        // Clica em Salvar
         const submitButton = screen.getByRole('button', { name: /salvar transação/i });
         fireEvent.click(submitButton);
 
-        // Verifica se a função update foi chamada com a nova descrição e o ID correto
         await waitFor(() => {
             expect(transactionService.update).toHaveBeenCalledWith('123', expect.objectContaining({
                 description: 'Compra no shopping',
-                amount: 150.5, // Garante que não perdeu o valor antigo
+                amount: 150.5,
             }));
-            // Verifica se redirecionou pra lista
             expect(mockRouterPush).toHaveBeenCalledWith('/transactions');
         });
     });
