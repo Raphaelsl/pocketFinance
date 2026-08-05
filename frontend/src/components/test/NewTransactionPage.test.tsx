@@ -1,4 +1,3 @@
-
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -44,31 +43,17 @@ describe('NewTransactionsPage Unit Tests', () => {
 
     it('envia o payload normalizado ao criar uma transação válida', async () => {
         (transactionService.create as jest.Mock).mockResolvedValue({});
-        const { container } = renderWithQueryClient(<NewTransactionsPage />);
+        renderWithQueryClient(<NewTransactionsPage />);
 
-        // Simulando a digitação no input (o HTML sempre trata valores como string)
         fireEvent.change(screen.getByLabelText(/valor/i), { target: { value: '150.50' } });
-
-        // Simulando a digitação da moeda com espaços indesejados e em minúsculo
         fireEvent.change(screen.getByLabelText(/moeda/i), { target: { value: 'usd' } });
-
-        // Simulando a digitação da descrição com espaços sobrando
-        fireEvent.change(screen.getByLabelText(/descr/i), {
-            target: { value: ' Projeto Freelance ' },
-        });
-
-        const dateInput = container.querySelector('input[type="datetime-local"]');
-        expect(dateInput).not.toBeNull();
-        fireEvent.change(dateInput!, { target: { value: '2026-06-24T14:30' } });
-
-        fireEvent.change(screen.getByRole('combobox'), {
-            target: { value: TransactionType.INCOME },
-        });
+        fireEvent.change(screen.getByLabelText(/descr/i), { target: { value: ' Projeto Freelance ' } });
+        fireEvent.change(screen.getByLabelText(/data e hora/i), { target: { value: '2026-06-24T14:30' } });
+        fireEvent.change(screen.getByRole('combobox'), { target: { value: TransactionType.INCOME } });
 
         fireEvent.click(screen.getByRole('button', { name: /Criar trans/i }));
 
         await waitFor(() => {
-
             expect(transactionService.create).toHaveBeenCalledWith({
                 amount: 150.5,
                 type: TransactionType.INCOME,
@@ -96,17 +81,12 @@ describe('NewTransactionsPage Unit Tests', () => {
     });
 
     it('rejeita valores nulos, zero ou negativos no campo amount', async () => {
-
-        const { container } = renderWithQueryClient(<NewTransactionsPage />);
+        renderWithQueryClient(<NewTransactionsPage />);
 
         fireEvent.change(screen.getByLabelText(/valor/i), { target: { value: '0' } });
         fireEvent.change(screen.getByLabelText(/moeda/i), { target: { value: 'BRL' } });
         fireEvent.change(screen.getByLabelText(/descr/i), { target: { value: 'Teste' } });
-
-        const dateInput = container.querySelector('input[type="datetime-local"]');
-        if (dateInput) {
-            fireEvent.change(dateInput, { target: { value: '2026-06-24T14:30' } });
-        }
+        fireEvent.change(screen.getByLabelText(/data e hora/i), { target: { value: '2026-06-24T14:30' } });
 
         fireEvent.click(screen.getByRole('button', { name: /Criar trans/i }));
 
