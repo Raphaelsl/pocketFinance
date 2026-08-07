@@ -1,4 +1,3 @@
-// src/components/Button.tsx
 
 interface ButtonProps {
     text: string;
