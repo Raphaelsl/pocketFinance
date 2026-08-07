@@ -32,7 +32,7 @@ public class DashboardController {
             @RequestParam @NotBlank(message = "Currency is required")
             @Pattern(regexp = "^[a-zA-Z]{3}$", message = "Currency must be a 3-letter code") String currency) {
 
-        // Normaliza a moeda para maiúsculas (ex: "brl" -> "BRL")
+
         String normalizedCurrency = currency.toUpperCase();
 
         DashboardResponse response = dashboardService.getDashboard(start, end, normalizedCurrency);
