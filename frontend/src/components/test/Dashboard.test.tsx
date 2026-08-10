@@ -4,10 +4,8 @@ import DashboardPage from '../../app/dashboard/page';
 import { useDashboard } from '../../hooks/useDashboard';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 
-
 jest.mock('../../hooks/useDashboard');
 const mockedUseDashboard = useDashboard as jest.Mock;
-
 
 jest.mock('next/navigation', () => ({
     useRouter: jest.fn(),
@@ -25,18 +23,17 @@ describe('DashboardPage Component (Filtros e URL)', () => {
     beforeEach(() => {
         jest.clearAllMocks();
 
-
         mockedUseRouter.mockReturnValue({ push: mockPush });
         mockedUsePathname.mockReturnValue('/dashboard');
         mockedUseSearchParams.mockReturnValue(new URLSearchParams(''));
-
 
         mockedUseDashboard.mockReturnValue({
             isLoading: false,
             isFetching: false,
             isError: false,
             data: {
-                summary: { totalIncome: 5000, totalExpense: 2000, balance: 3000, transactionCount: 10 }
+                summary: { totalIncome: 5000, totalExpense: 2000, balance: 3000, transactionCount: 10 },
+                categoryBreakdown: [] //
             },
         });
     });
@@ -51,11 +48,9 @@ describe('DashboardPage Component (Filtros e URL)', () => {
     });
 
     it('deve usar valores de fallback seguros caso a URL tenha dados inválidos', () => {
-
         mockedUseSearchParams.mockReturnValue(new URLSearchParams('start=invalido&end=bizarro&currency=YYZ'));
 
         render(<DashboardPage />);
-
 
         expect(mockedUseDashboard).toHaveBeenCalledWith(expect.objectContaining({
             currency: 'BRL'
@@ -68,25 +63,23 @@ describe('DashboardPage Component (Filtros e URL)', () => {
         const btn3Meses = screen.getByText('3 Meses');
         fireEvent.click(btn3Meses);
 
-
         expect(mockPush).toHaveBeenCalledTimes(1);
         expect(mockPush.mock.calls[0][0]).toContain('?start=');
         expect(mockPush.mock.calls[0][0]).toContain('end=');
     });
 
     it('deve aplicar classe de opacidade na tela quando isFetching for true (Atualizando)', () => {
-
         mockedUseDashboard.mockReturnValue({
             isLoading: false,
             isFetching: true,
             isError: false,
             data: {
-                summary: { totalIncome: 100, totalExpense: 50, balance: 50, transactionCount: 1 }
+                summary: { totalIncome: 100, totalExpense: 50, balance: 50, transactionCount: 1 },
+                categoryBreakdown: []
             },
         });
 
         render(<DashboardPage />);
-
 
         const containerGrid = screen.getByText('Receitas').closest('.grid');
         expect(containerGrid).toHaveClass('opacity-50');
