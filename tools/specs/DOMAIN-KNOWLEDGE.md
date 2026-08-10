@@ -304,6 +304,15 @@ Deve usar `type` para calcular:
 - distribuição por categoria;
 - evolução por período.
 
+Regras definidas em `SPEC-008`:
+
+- agregar uma moeda por consulta;
+- nunca somar valores de moedas diferentes sem conversão explícita;
+- calcular `saldo = entradas - saídas`;
+- considerar somente `EXPENSE` na distribuição por categoria;
+- agrupar transações sem categoria como `Sem categoria`;
+- usar intervalo temporal `[start, end)` com limite de 12 meses.
+
 ### AI / LLM
 
 Fase futura.
@@ -363,4 +372,3 @@ Regra importante:
 - `Category` organiza, mas ainda não é core.
 - `metadata` é extensível e deve ser usado com cuidado.
 - Dashboard e LLM são evoluções futuras.
-
