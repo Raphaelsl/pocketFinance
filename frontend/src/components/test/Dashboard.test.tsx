@@ -56,7 +56,7 @@ describe('DashboardPage Component (Filtros e URL)', () => {
 
         render(<DashboardPage />);
 
-        // O sistema deve ignorar o lixo e cair no fallback padrão (BRL e range válido)
+
         expect(mockedUseDashboard).toHaveBeenCalledWith(expect.objectContaining({
             currency: 'BRL'
         }));

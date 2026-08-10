@@ -5,6 +5,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useDashboard } from '../../hooks/useDashboard';
 import { formatCurrency, formatBalance } from '../../utils/formatters';
 import { parseFiltersFromURL, getPresetDateRange } from '../../utils/dashboardFilters';
+import { ExpenseCategoryBreakdown } from '../../components/dashboard/ExpenseCategoryBreakdown';
 
 export default function Dashboard() {
     const router = useRouter();
@@ -119,40 +120,49 @@ export default function Dashboard() {
                     </Link>
                 </div>
             ) : (
+                <>
+                    <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 transition-opacity duration-200 ${isFetching ? 'opacity-50' : 'opacity-100'}`}>
 
-                <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 transition-opacity duration-200 ${isFetching ? 'opacity-50' : 'opacity-100'}`}>
+                        <div className="p-4 border border-gray-200 rounded-lg shadow-sm bg-white">
+                            <h3 className="text-sm text-gray-500 font-medium">Receitas</h3>
+                            <p className="mt-2 text-2xl font-bold text-gray-900">
+                                {formatCurrency(totalIncome, filters.currency)}
+                            </p>
+                        </div>
 
-                    <div className="p-4 border border-gray-200 rounded-lg shadow-sm bg-white">
-                        <h3 className="text-sm text-gray-500 font-medium">Receitas</h3>
-                        <p className="mt-2 text-2xl font-bold text-gray-900">
-                            {formatCurrency(totalIncome, filters.currency)}
-                        </p>
+                        <div className="p-4 border border-gray-200 rounded-lg shadow-sm bg-white">
+                            <h3 className="text-sm text-gray-500 font-medium">Despesas</h3>
+                            <p className="mt-2 text-2xl font-bold text-gray-900">
+                                {formatCurrency(totalExpense, filters.currency)}
+                            </p>
+                        </div>
+
+                        <div className="p-4 border border-gray-200 rounded-lg shadow-sm bg-white">
+                            <h3 className="text-sm text-gray-500 font-medium">Saldo</h3>
+                            <p className={`mt-2 text-2xl font-bold ${
+                                balance > 0 ? 'text-green-600' : balance < 0 ? 'text-red-600' : 'text-gray-900'
+                            }`}>
+                                {formatBalance(balance, filters.currency)}
+                            </p>
+                        </div>
+
+                        <div className="p-4 border border-gray-200 rounded-lg shadow-sm bg-white">
+                            <h3 className="text-sm text-gray-500 font-medium">Transações</h3>
+                            <p className="mt-2 text-2xl font-bold text-gray-900">
+                                {transactionCount}
+                            </p>
+                        </div>
+
                     </div>
 
-                    <div className="p-4 border border-gray-200 rounded-lg shadow-sm bg-white">
-                        <h3 className="text-sm text-gray-500 font-medium">Despesas</h3>
-                        <p className="mt-2 text-2xl font-bold text-gray-900">
-                            {formatCurrency(totalExpense, filters.currency)}
-                        </p>
+                    {/* Breakdown de Categorias */}
+                    <div className={`mt-6 transition-opacity duration-200 ${isFetching ? 'opacity-50' : 'opacity-100'}`}>
+                        <ExpenseCategoryBreakdown
+                            breakdown={data.categoryBreakdown}
+                            currency={filters.currency}
+                        />
                     </div>
-
-                    <div className="p-4 border border-gray-200 rounded-lg shadow-sm bg-white">
-                        <h3 className="text-sm text-gray-500 font-medium">Saldo</h3>
-                        <p className={`mt-2 text-2xl font-bold ${
-                            balance > 0 ? 'text-green-600' : balance < 0 ? 'text-red-600' : 'text-gray-900'
-                        }`}>
-                            {formatBalance(balance, filters.currency)}
-                        </p>
-                    </div>
-
-                    <div className="p-4 border border-gray-200 rounded-lg shadow-sm bg-white">
-                        <h3 className="text-sm text-gray-500 font-medium">Transações</h3>
-                        <p className="mt-2 text-2xl font-bold text-gray-900">
-                            {transactionCount}
-                        </p>
-                    </div>
-
-                </div>
+                </>
             )}
         </div>
     );
