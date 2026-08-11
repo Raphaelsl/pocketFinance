@@ -6,6 +6,7 @@ import { useDashboard } from '../../hooks/useDashboard';
 import { formatCurrency, formatBalance } from '../../utils/formatters';
 import { parseFiltersFromURL, getPresetDateRange } from '../../utils/dashboardFilters';
 import { ExpenseCategoryBreakdown } from '../../components/dashboard/ExpenseCategoryBreakdown';
+import { MonthlyFinancialEvolution } from '../../components/dashboard/MonthlyFinancialEvolution';
 
 export default function Dashboard() {
     const router = useRouter();
@@ -155,10 +156,18 @@ export default function Dashboard() {
 
                     </div>
 
+
                     {/* Breakdown de Categorias */}
                     <div className={`mt-6 transition-opacity duration-200 ${isFetching ? 'opacity-50' : 'opacity-100'}`}>
                         <ExpenseCategoryBreakdown
                             breakdown={data.categoryBreakdown}
+                            currency={filters.currency}
+                        />
+                    </div>
+                    {/* Evolução Mensal */}
+                    <div className={`mt-6 transition-opacity duration-200 ${isFetching ? 'opacity-50' : 'opacity-100'}`}>
+                        <MonthlyFinancialEvolution
+                            evolution={data.monthlyEvolution}
                             currency={filters.currency}
                         />
                     </div>

@@ -33,7 +33,7 @@ describe('DashboardPage Component (Filtros e URL)', () => {
             isError: false,
             data: {
                 summary: { totalIncome: 5000, totalExpense: 2000, balance: 3000, transactionCount: 10 },
-                categoryBreakdown: [] //
+                categoryBreakdown: [], monthlyEvolution: []
             },
         });
     });
@@ -75,13 +75,13 @@ describe('DashboardPage Component (Filtros e URL)', () => {
             isError: false,
             data: {
                 summary: { totalIncome: 100, totalExpense: 50, balance: 50, transactionCount: 1 },
-                categoryBreakdown: []
+                categoryBreakdown: [], monthlyEvolution: []
             },
         });
 
         render(<DashboardPage />);
 
-        const containerGrid = screen.getByText('Receitas').closest('.grid');
+        const containerGrid = screen.getAllByText('Receitas')[0].closest('.grid');
         expect(containerGrid).toHaveClass('opacity-50');
     });
 
