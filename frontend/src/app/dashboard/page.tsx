@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useDashboard } from '../../hooks/useDashboard';
 import { formatCurrency, formatBalance } from '../../utils/formatters';
@@ -8,7 +9,7 @@ import { parseFiltersFromURL, getPresetDateRange } from '../../utils/dashboardFi
 import { ExpenseCategoryBreakdown } from '../../components/dashboard/ExpenseCategoryBreakdown';
 import { MonthlyFinancialEvolution } from '../../components/dashboard/MonthlyFinancialEvolution';
 
-export default function Dashboard() {
+function DashboardContent() {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -174,5 +175,20 @@ export default function Dashboard() {
                 </>
             )}
         </div>
+    );
+}
+export default function DashboardPage() {
+    return (
+        <Suspense
+            fallback={
+                <div className="p-8 max-w-6xl mx-auto flex justify-center items-center min-h-[50vh]">
+                    <div className="animate-pulse text-gray-500 font-medium">
+                        Carregando painel financeiro...
+                    </div>
+                </div>
+            }
+        >
+            <DashboardContent />
+        </Suspense>
     );
 }

@@ -4,12 +4,13 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useCreateTransaction } from '@/hooks/useTransactions';
 import { TransactionType, TransactionCreateRequest } from '@/types/transaction';
+import { useQueryClient } from '@tanstack/react-query';
+
 export default function NewTransactionsPage() {
     const router = useRouter();
-
+    const queryClient = useQueryClient();
 
     const createMutation = useCreateTransaction();
-
 
     const { register, handleSubmit, formState: { errors } } = useForm<TransactionCreateRequest>({
         defaultValues: {
@@ -20,7 +21,12 @@ export default function NewTransactionsPage() {
 
     const onSubmit = (data: TransactionCreateRequest) => {
         createMutation.mutate(data, {
-            onSuccess: () => {
+            onSuccess: async () => {
+
+                await queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+                await queryClient.invalidateQueries({ queryKey: ['transactions'] });
+
+
                 router.push('/transactions');
                 router.refresh();
             }
@@ -41,7 +47,6 @@ export default function NewTransactionsPage() {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 rounded-xl border bg-white p-6 shadow-sm">
 
                 {createMutation.isError && (
-                    // Adicionado role="alert"
                     <p role="alert" className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                         Erro ao criar transação. Tente novamente.
                     </p>
@@ -58,7 +63,6 @@ export default function NewTransactionsPage() {
                             step="0.01"
                             className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             placeholder="0.00"
-                            // Ligações de acessibilidade
                             aria-invalid={errors.amount ? "true" : "false"}
                             aria-describedby={errors.amount ? "amount-error" : undefined}
                             {...register('amount', {
@@ -66,7 +70,6 @@ export default function NewTransactionsPage() {
                                 min: { value: 0.01, message: 'Valor deve ser maior que zero' },
                             })}
                         />
-                        {/* ID e role="alert" conectados */}
                         {errors.amount && <p id="amount-error" role="alert" className="text-sm text-red-600">{errors.amount.message}</p>}
                     </div>
 
@@ -77,7 +80,6 @@ export default function NewTransactionsPage() {
                         <select
                             id="type"
                             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                            // Ligações de acessibilidade
                             aria-invalid={errors.type ? "true" : "false"}
                             aria-describedby={errors.type ? "type-error" : undefined}
                             {...register('type', { required: 'Tipo é obrigatório' })}
@@ -98,7 +100,6 @@ export default function NewTransactionsPage() {
                             maxLength={3}
                             className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 uppercase outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             placeholder="BRL"
-                            // Ligações de acessibilidade
                             aria-invalid={errors.currency ? "true" : "false"}
                             aria-describedby={errors.currency ? "currency-error" : undefined}
                             {...register('currency', {
@@ -117,7 +118,6 @@ export default function NewTransactionsPage() {
                             id="occurredAt"
                             type="datetime-local"
                             className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                            // Ligações de acessibilidade
                             aria-invalid={errors.occurredAt ? "true" : "false"}
                             aria-describedby={errors.occurredAt ? "occurredAt-error" : undefined}
                             {...register('occurredAt', { required: 'Data é obrigatória' })}
@@ -135,7 +135,6 @@ export default function NewTransactionsPage() {
                         type="text"
                         className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         placeholder="Ex: Compra no mercado"
-                        // Ligações de acessibilidade
                         aria-invalid={errors.description ? "true" : "false"}
                         aria-describedby={errors.description ? "description-error" : undefined}
                         {...register('description', { required: 'Descrição é obrigatória' })}
