@@ -13,7 +13,11 @@ export const dashboardService = {
         const response = await fetch(`${API_URL}/api/dashboard?${params.toString()}`);
 
         if (!response.ok) {
-            throw new Error('Falha ao buscar dados do dashboard');
+
+            const errorBody = await response.json().catch(() => null);
+
+
+            throw new Error(errorBody?.message || 'Falha ao buscar dados do dashboard');
         }
 
         return response.json();

@@ -2,18 +2,18 @@ import { DashboardFilters } from '../types/dashboard';
 
 export const DEFAULT_CURRENCY = 'BRL';
 
+const ALLOWED_CURRENCIES = ['BRL', 'USD', 'EUR'] as const;
 
-export function getPresetDateRange(months: number): { start: string; end: string } {
+export function getPresetDateRange(months: number) {
     const now = new Date();
 
+    const startDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - (months - 1), 1, 0, 0, 0));
 
-    const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-
-    const startDate = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1, 0, 0, 0);
+    const endDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0));
 
     return {
         start: startDate.toISOString(),
-        end: endDate.toISOString(),
+        end: endDate.toISOString()
     };
 }
 
@@ -26,9 +26,7 @@ function isValidDateRange(startStr: string, endStr: string): boolean {
     const start = new Date(startStr).getTime();
     const end = new Date(endStr).getTime();
 
-
     if (isNaN(start) || isNaN(end)) return false;
-
     if (start >= end) return false;
 
     const ONE_YEAR_MS = 366 * 24 * 60 * 60 * 1000;
@@ -37,19 +35,30 @@ function isValidDateRange(startStr: string, endStr: string): boolean {
     return true;
 }
 
-
 export function parseFiltersFromURL(searchParams: URLSearchParams): DashboardFilters {
     const start = searchParams.get('start');
     const end = searchParams.get('end');
-    const currency = searchParams.get('currency');
+
+
+    const rawCurrency = searchParams.get('currency');
+    const parsedCurrency = rawCurrency ? rawCurrency.toUpperCase() : '';
+
+
+    const validCurrency = (ALLOWED_CURRENCIES as readonly string[]).includes(parsedCurrency)
+        ? parsedCurrency
+        : DEFAULT_CURRENCY;
 
     if (start && end && isValidDateRange(start, end)) {
         return {
             start,
             end,
-            currency: currency || DEFAULT_CURRENCY,
+            currency: validCurrency,
         };
     }
 
-    return DEFAULT_FILTERS;
+
+    return {
+        ...DEFAULT_FILTERS,
+        currency: validCurrency,
+    };
 }
