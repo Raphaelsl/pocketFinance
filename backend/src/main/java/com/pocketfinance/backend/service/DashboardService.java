@@ -5,7 +5,6 @@ import com.pocketfinance.backend.dto.dashboard.DashboardResponse;
 import com.pocketfinance.backend.dto.dashboard.DashboardSummary;
 import com.pocketfinance.backend.dto.dashboard.MonthlyEvolution;
 import com.pocketfinance.backend.repository.TransactionRepository;
-import com.pocketfinance.backend.repository.projection.CategoryBreakdownProjection;
 import com.pocketfinance.backend.repository.projection.DashboardSummaryProjection;
 import com.pocketfinance.backend.repository.projection.MonthlyEvolutionProjection;
 import org.springframework.stereotype.Service;
@@ -72,7 +71,6 @@ public class DashboardService {
     private List<MonthlyEvolution> buildMonthlyEvolution(Instant start, Instant end, String currency) {
         List<MonthlyEvolutionProjection> rawProjections = transactionRepository.getMonthlyEvolution(start, end, currency);
 
-
         Map<String, MonthlyEvolutionProjection> projectionMap = rawProjections.stream()
                 .collect(Collectors.toMap(
                         p -> String.format("%04d-%02d", p.getYear(), p.getMonth()),
@@ -84,12 +82,7 @@ public class DashboardService {
         YearMonth endMonth = YearMonth.from(end.atZone(ZoneId.of("UTC")));
 
 
-        if (end.equals(endMonth.atDay(1).atStartOfDay(ZoneId.of("UTC")).toInstant()) && currentMonth.isBefore(endMonth)) {
-            endMonth = endMonth.minusMonths(1);
-        }
-
-
-        while (!currentMonth.isAfter(endMonth)) {
+        while (currentMonth.isBefore(endMonth)) {
             String monthKey = currentMonth.toString(); // Formato automático do toString é "YYYY-MM"
             MonthlyEvolutionProjection proj = projectionMap.get(monthKey);
 
@@ -101,7 +94,7 @@ public class DashboardService {
                 evolution.add(new MonthlyEvolution(monthKey, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO));
             }
 
-            currentMonth = currentMonth.plusMonths(1); // Avança pro próximo mês
+            currentMonth = currentMonth.plusMonths(1);
         }
 
         return evolution;

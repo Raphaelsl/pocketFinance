@@ -75,15 +75,15 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID>,
 
     @Query(value = """
         SELECT 
-            CAST(EXTRACT(YEAR FROM occurred_at) AS INTEGER) AS year,
-            CAST(EXTRACT(MONTH FROM occurred_at) AS INTEGER) AS month,
+            CAST(EXTRACT(YEAR FROM occurred_at) AS INTEGER) AS "year",
+            CAST(EXTRACT(MONTH FROM occurred_at) AS INTEGER) AS "month",
             COALESCE(SUM(CASE WHEN type = 'INCOME' THEN amount ELSE 0 END), 0) AS income,
             COALESCE(SUM(CASE WHEN type = 'EXPENSE' THEN amount ELSE 0 END), 0) AS expense
         FROM transactions
         WHERE occurred_at >= :start AND occurred_at < :end
         AND currency = :currency
         GROUP BY EXTRACT(YEAR FROM occurred_at), EXTRACT(MONTH FROM occurred_at)
-        ORDER BY year, month
+        ORDER BY "year", "month"
     """, nativeQuery = true)
     List<MonthlyEvolutionProjection> getMonthlyEvolution(
             @Param("start") Instant start,
