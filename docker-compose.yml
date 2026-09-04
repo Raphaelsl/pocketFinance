@@ -4,7 +4,7 @@ services:
     image: postgres:15
     environment:
       - POSTGRES_USER=pocket
-      - POSTGRES_PASSWORD=pocketpass
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-pocketpass}
       - POSTGRES_DB=pocketfinance
     ports:
       - "5432:5432"

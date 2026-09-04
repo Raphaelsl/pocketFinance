@@ -6,6 +6,8 @@ Micro-SaaS educacional com dois objetivos:
 1. **Produto real** — controle financeiro com backend, frontend e futura IA
 2. **Formação técnica** — acelerar o Dev (filho do TL) com práticas reais de engenharia
 
+**Origem e intenção do projeto:** ver `PROJECT-VISION.md`.
+
 ## Princípios
 
 - Core first (Transaction antes de Category)
@@ -22,10 +24,13 @@ Micro-SaaS educacional com dois objetivos:
 |-------|------|--------|
 | A | Setup & Infraestrutura | ✅ Concluído |
 | B | Backend CRUD (Transaction) | ✅ Concluído |
-| C | Frontend (Next.js) + Integração | 🔜 Próximo |
-| D | Dashboard & Aggregations | ⏳ Futuro |
-| E | LLM Integration | ⏳ Futuro |
+| C | Frontend (Next.js) + Integração | ✅ Concluído |
+| Pós-C | Architecture & Code Quality | ✅ Concluído |
+| D | Dashboard & Aggregations | 🚧 Em andamento |
+| E | AI Engineering | 📝 Spec e cards preparados |
 | F | Deploy & Productionization | ⏳ Futuro |
+
+**Roadmap por competências:** ver `LEARNING-ROADMAP.md`.
 
 ---
 
@@ -56,12 +61,13 @@ Micro-SaaS educacional com dois objetivos:
 | SPEC-002 | C1 Setup Next.js | Next.js + Tailwind + service layer base | Fundação |
 | SPEC-003 | C2 List Transactions | fetch + useState (intencional) | **Pedagógica** |
 | SPEC-004 | C3 Create Transaction | useState manual + validação (intencional) | **Pedagógica** |
+| SPEC-004 | C3.1 Create Polish | validação, normalização, consistência visual | **Qualidade incremental** |
 | SPEC-005 | C4 Edit Transaction | React Query + React Hook Form | **Upgrade** |
 | SPEC-006 | C5 Delete Flow | useMutation + ConfirmDeleteModal | **Consolida** |
 
 **📖 Estratégia Pedagógica:** Abordagem progressiva "sentir dor → aprender solução". Ver `PEDAGOGIA-EPICO-C.md` para detalhes de cada spike.
 
-## Épico C — Frontend Next.js + Integração 🔜
+## Épico C — Frontend Next.js + Integração ✅
 
 ### Subépicos planejados
 | ID | Escopo | Abordagem |
@@ -69,6 +75,7 @@ Micro-SaaS educacional com dois objetivos:
 | C1 | Setup Next.js — estrutura, layout | Fundação (sem lógica assíncrona) |
 | C2 | List Transactions — GET paginado, loading, error state | fetch + useState (manual) |
 | C3 | Create Transaction — form, POST, feedback visual | useState por campo (manual) |
+| C3.1 | Polish Create Transaction — validação e consistência | Sem React Query/RHF ainda |
 | C4 | Edit Transaction — React Query + React Hook Form | Upgrade: libs depois de sentir dor |
 | C5 | Delete Flow — confirmation modal, mutations | Consolida padrão useMutation |
 
@@ -108,7 +115,8 @@ A progressão C1 → C2 → C3 → C4 → C5 é **intencional e pedagógica**.
 
 **Backend:** fluxo HTTP, Controller → Service → Repository, DTO, paginação, Specification, PRs, logs
 
-**Frontend:** a iniciar no Épico C
+**Frontend:** Épico C concluído. O Dev já praticou Next.js, React, TypeScript,
+React Query, React Hook Form, testes de componentes e integração com backend.
 
 ---
 
@@ -121,9 +129,74 @@ A progressão C1 → C2 → C3 → C4 → C5 é **intencional e pedagógica**.
 | DB | PostgreSQL 15 (Docker) |
 | Migrations | Flyway |
 | Admin DB | Adminer |
-| Frontend | Next.js (a definir detalhes) |
-| Testes | JUnit 5 + Spring Boot Test |
+| Frontend | Next.js + React + TypeScript + Tailwind |
+| Estado assíncrono | React Query |
+| Forms | React Hook Form |
+| Testes | JUnit 5 + Spring Boot Test; Jest + React Testing Library |
 | API Docs | Postman Collection (`tools/postman/`) |
+
+## Próxima fase após Épico C
+
+Como C5 já está funcionando, abrir uma fase curta de **Architecture & Code Quality**.
+Essa fase não deve virar produto novo; ela existe para consolidar padrões depois
+que a repetição ficou visível.
+
+Tasks planejadas:
+- PC1 — Architecture baseline review
+- PC2 — Domain hooks e boundaries de React Query
+- PC3 — Normalização de payloads e contrato do service
+- PC4 — Acessibilidade de modal e forms
+- PC5 — Test cleanup e quality gate
+
+Referência principal: `SPEC-007-post-c-architecture-code-quality.md`.
+
+## Épico E — AI Engineering
+
+O Épico E introduz entrada por linguagem natural e forma o Dev em AI Engineering.
+
+Objetivo: o usuário descreve uma transação em texto livre e o sistema gera uma
+sugestão estruturada para confirmação humana.
+
+Stack: Spring AI + OpenAI (GPT-4o mini) + frontend com input de texto livre.
+
+Cards planejados:
+
+- E1 — Spring AI Setup + First Call
+- E2 — Structured Output: TransactionSuggestionResult
+- E3 — Suggest Workflow, Validation & API
+- E4 — Fallbacks, Observability & Guardrails
+- E5 — Frontend: Natural Language Input UI
+- E6 — AI Quality Gate
+
+Referência principal: `SPEC-009-epic-e-ai-engineering.md`.
+
+---
+
+## Épico D — Dashboard & Aggregations
+
+O Épico D está especificado, mas continua bloqueado pela conclusão de PC5.
+
+Objetivo: transformar as transações existentes em informação financeira útil sem
+criar uma segunda fonte de verdade.
+
+Cards planejados:
+
+- D1 — Dashboard Aggregation API
+- D2 — Dashboard Shell & KPI Summary
+- D3 — Period & Currency Filters
+- D4 — Expense Category Breakdown
+- D5 — Monthly Financial Evolution
+- D6 — Dashboard Quality Gate
+
+Decisões fechadas para o primeiro dashboard:
+
+- Um endpoint composto: `GET /api/dashboard`.
+- Agregações executadas no backend e no banco, nunca sobre a página atual do frontend.
+- Uma moeda por consulta; sem conversão cambial.
+- Período máximo de 12 meses.
+- Sem nova tabela, cache ou biblioteca de gráficos.
+
+Referência principal: `SPEC-008-epic-d-dashboard-aggregations.md`.
 
 ## Convenções
 

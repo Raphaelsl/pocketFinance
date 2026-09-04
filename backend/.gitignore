@@ -34,3 +34,5 @@ build/
 
 # Local Variable
 .env
+### Local dev config (may contain credentials) ###
+application-dev.properties
