@@ -7,8 +7,15 @@ spring:
   config:
     activate:
       on-profile: dev
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-4o-mini
+          temperature: 0.1
   datasource:
-    url: jdbc:postgresql://localhost:5432/pocketdb
+    url: jdbc:postgresql://localhost:5432/pocketfinance
     username: pocket
     password: ${DB_PASSWORD:pocketpass}
   jpa:
