@@ -1,43 +1,46 @@
 package com.pocketfinance.backend.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.pocketfinance.backend.dto.TransactionSuggestionResult;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/spike")
 public class AiSpikeController {
 
-    private static final Logger logger = LoggerFactory.getLogger(AiSpikeController.class);
     private final ChatClient chatClient;
 
-    public AiSpikeController(ChatClient chatClient) {
-        this.chatClient = chatClient;
+    public AiSpikeController(ChatClient.Builder chatClientBuilder) {
+        this.chatClient = chatClientBuilder.build();
     }
 
-    @PostMapping("/parse")
-    public String parse(@RequestBody Map<String, String> request) {
-        String input = request.get("input");
+    @PostMapping(value = "/parse", produces = "application/json; charset=utf-8")
+    public TransactionSuggestionResult parse(@RequestBody Map<String, String> payload) {
+        String input = payload.get("input");
+        String currentDate = LocalDate.now().toString();
 
-        long startTime = System.currentTimeMillis();
-        ChatResponse response = chatClient.prompt()
+        String systemPrompt = """
+                Você é um assistente financeiro. Extraia os detalhes da transação a partir do texto do usuário.
+                Regras obrigatórias de formatação:
+                - amount: Valor numérico positivo. Se houver sinal negativo, converta para positivo.
+                - type: O tipo da transação, deve ser estritamente "INCOME" ou "EXPENSE" em letras maiúsculas.
+                - currency: Se não especificado, o padrão é "BRL".
+                - description: Descrição curta e objetiva.
+                - occurredAt: Data no formato ISO-8601 (YYYY-MM-DD). A data atual é %s. Resolva referências relativas (como "hoje", "ontem") baseando-se nela.
+                - suggestedCategoryName: Categoria sugerida para a transação.
+                - confidence: Nível de confiança da extração ("LOW", "MEDIUM", "HIGH").
+                """.formatted(currentDate);
+
+        return chatClient.prompt()
+                .system(systemPrompt)
                 .user(input)
                 .call()
-                .chatResponse();
-        long latency = System.currentTimeMillis() - startTime;
-
-        String output = response.getResults().get(0).getOutput().getText();
-
-        logger.info("Spike Latency: {} ms", latency);
-        logger.info("Spike Response Metadata: {}", response.getMetadata());
-
-        return output;
+                .entity(TransactionSuggestionResult.class);
     }
 }
