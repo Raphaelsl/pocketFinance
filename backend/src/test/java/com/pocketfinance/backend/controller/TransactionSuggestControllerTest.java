@@ -81,4 +81,29 @@ class TransactionSuggestControllerTest {
                 .andExpect(jsonPath("$.message").value("PARSING_FAILED: Invalid data"))
                 .andExpect(jsonPath("$.details[0]").value("rawInput: " + input));
     }
+    @Test
+    void shouldReturn503WhenAiServiceIsUnavailable() throws Exception {
+        String input = "Comprei algo na padaria por 10 reais";
+
+
+        when(service.suggest(input)).thenThrow(new org.springframework.web.client.RestClientException("Simulated AI downtime"));
+
+        mockMvc.perform(post("/api/transactions/suggest")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("input", input))))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.message").value("AI_SERVICE_UNAVAILABLE: O serviço de inteligência artificial falhou."));
+    }
+
+    @Test
+    void shouldNotCallServiceWhenInputExceeds500Characters() throws Exception {
+
+        String longInput = "a".repeat(501);
+
+        mockMvc.perform(post("/api/transactions/suggest")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("input", longInput))))
+                .andExpect(status().isBadRequest());
+        org.mockito.Mockito.verify(service, org.mockito.Mockito.never()).suggest(org.mockito.ArgumentMatchers.anyString());
+    }
 }

@@ -2,13 +2,21 @@ package com.pocketfinance.backend.adapter;
 
 import com.pocketfinance.backend.dto.TransactionSuggestionResult;
 import com.pocketfinance.backend.port.TransactionParserPort;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.metadata.Usage;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
 @Component
 public class SpringAiTransactionParser implements TransactionParserPort {
+
+
+    private static final Logger log = LoggerFactory.getLogger(SpringAiTransactionParser.class);
 
     private static final String SYSTEM_PROMPT = """
             Você é um assistente financeiro. Extraia os detalhes da transação a partir do texto do usuário.
@@ -23,20 +31,38 @@ public class SpringAiTransactionParser implements TransactionParserPort {
             """;
 
     private final ChatClient chatClient;
+    private final BeanOutputConverter<TransactionSuggestionResult> converter;
 
     public SpringAiTransactionParser(ChatClient.Builder chatClientBuilder) {
         this.chatClient = chatClientBuilder.build();
+        this.converter = new BeanOutputConverter<>(TransactionSuggestionResult.class);
     }
 
     @Override
     public TransactionSuggestionResult parse(String input) {
         String currentDate = LocalDate.now().toString();
-        String promptWithDate = String.format(SYSTEM_PROMPT, currentDate);
 
-        return chatClient.prompt()
-                .system(promptWithDate)
+
+        String promptWithDateAndFormat = String.format(SYSTEM_PROMPT, currentDate) + "\n" + converter.getFormat();
+
+
+        ChatResponse response = chatClient.prompt()
+                .system(promptWithDateAndFormat)
                 .user(input)
                 .call()
-                .entity(TransactionSuggestionResult.class);
+                .chatResponse();
+
+
+        if (response != null && response.getMetadata() != null && response.getMetadata().getUsage() != null) {
+            Usage usage = response.getMetadata().getUsage();
+            log.info("AI suggest | tokens_prompt={} tokens_completion={} model={}",
+                    usage.getPromptTokens(),
+                    usage.getCompletionTokens(),
+                    response.getMetadata().getModel());
+        }
+
+
+        String content = response.getResult().getOutput().getText();
+        return converter.convert(content);
     }
 }
