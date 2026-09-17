@@ -1,10 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { useCreateTransaction } from '@/hooks/useTransactions';
 import { TransactionType, TransactionCreateRequest } from '@/types/transaction';
 import { useQueryClient } from '@tanstack/react-query';
+import { NaturalLanguageInput } from '@/components/ai/NaturalLanguageInput';
+import { SuggestResponse } from '@/services/transactionService';
+
 
 export default function NewTransactionsPage() {
     const router = useRouter();
@@ -12,14 +16,78 @@ export default function NewTransactionsPage() {
 
     const createMutation = useCreateTransaction();
 
-    const { register, handleSubmit, formState: { errors } } = useForm<TransactionCreateRequest>({
+    const [aiFeedback, setAiFeedback] = useState<{
+        type: 'SUCCESS' | 'ERROR';
+        confidence?: 'HIGH' | 'MEDIUM' | 'LOW';
+        message: string;
+        rawInput?: string;
+    } | null>(null);
+
+
+    const { register, handleSubmit,reset, formState: { errors } } = useForm<TransactionCreateRequest>({
         defaultValues: {
             type: TransactionType.EXPENSE,
             currency: 'BRL',
         }
     });
+    const handleAiSuccess = (data: SuggestResponse) => {
+
+        let formattedDate = data.suggestion.occurredAt;
+        if (formattedDate.includes('T')) {
+            formattedDate = formattedDate.slice(0, 16);
+        } else {
+            formattedDate = `${formattedDate}T12:00`;
+        }
+
+        reset({
+            amount: data.suggestion.amount,
+            type: data.suggestion.type as unknown as TransactionType,
+            currency: data.suggestion.currency || 'BRL',
+            description: data.suggestion.description,
+            occurredAt: formattedDate,
+        });
+
+
+        setAiFeedback({
+            type: 'SUCCESS',
+            confidence: data.confidence,
+            message: 'Formulário preenchido. Por favor, revise os dados antes de salvar.',
+            rawInput: data.rawInput,
+        });
+    };
+    const handleAiError = (error: Error) => {
+        reset({ type: TransactionType.EXPENSE, currency: 'BRL' }); // Limpa o form para o estado inicial
+
+        const errorMessage = error.message.includes("503")
+            ? "Serviço indisponível. Use o formulário abaixo."
+            : "Não foi possível entender a transação. Verifique o texto e tente novamente.";
+
+        setAiFeedback({
+            type: 'ERROR',
+            message: errorMessage,
+        });
+    };
+    const handleClearSuggestion = () => {
+        reset({
+            amount: '' as unknown as number,
+            description: '',
+            occurredAt: '',
+            type: TransactionType.EXPENSE,
+            currency: 'BRL'
+        });
+        setAiFeedback(null);
+    };
+
 
     const onSubmit = (data: TransactionCreateRequest) => {
+        if (aiFeedback?.type === 'SUCCESS') {
+            data.metadata = JSON.stringify({
+                source: "LLM",
+                model: "gpt-4o-mini",
+                rawInput: aiFeedback.rawInput,
+                confidence: aiFeedback.confidence
+            });
+        }
         createMutation.mutate(data, {
             onSuccess: async () => {
 
@@ -43,6 +111,33 @@ export default function NewTransactionsPage() {
                     </p>
                 </div>
             </div>
+            <NaturalLanguageInput onSuccess={handleAiSuccess} onError={handleAiError} />
+
+            {aiFeedback && (
+                <div className={`mb-6 p-4 rounded-xl border ${
+                    aiFeedback.type === 'ERROR' ? 'bg-red-50 border-red-200 text-red-800' :
+                        aiFeedback.confidence === 'HIGH' ? 'bg-green-50 border-green-200 text-green-800' :
+                            'bg-yellow-50 border-yellow-200 text-yellow-800'
+                }`}>
+                    <p className="text-sm font-medium">
+                        {aiFeedback.type === 'SUCCESS' && (
+                            <span className="mr-2 font-bold uppercase">
+                                {aiFeedback.confidence === 'HIGH' ? '🟢' : '🟡'} CONFIANÇA {aiFeedback.confidence} -
+                            </span>
+                        )}
+                        {aiFeedback.message}
+                    </p>
+                    {aiFeedback.type === 'SUCCESS' && (
+                        <button
+                            type="button"
+                            onClick={handleClearSuggestion}
+                            className="ml-4 text-sm font-semibold underline opacity-80 hover:opacity-100 transition-opacity"
+                        >
+                            Limpar sugestão
+                        </button>
+                    )}
+                </div>
+            )}
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 rounded-xl border bg-white p-6 shadow-sm">
 

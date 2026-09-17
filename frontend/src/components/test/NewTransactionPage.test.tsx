@@ -47,7 +47,7 @@ describe('NewTransactionsPage Unit Tests', () => {
 
         fireEvent.change(screen.getByLabelText(/valor/i), { target: { value: '150.50' } });
         fireEvent.change(screen.getByLabelText(/moeda/i), { target: { value: 'usd' } });
-        fireEvent.change(screen.getByLabelText(/descr/i), { target: { value: ' Projeto Freelance ' } });
+        fireEvent.change(screen.getByLabelText(/Descrição/i), { target: { value: ' Projeto Freelance ' } });
         fireEvent.change(screen.getByLabelText(/data e hora/i), { target: { value: '2026-06-24T14:30' } });
         fireEvent.change(screen.getByRole('combobox'), { target: { value: TransactionType.INCOME } });
 
@@ -85,7 +85,7 @@ describe('NewTransactionsPage Unit Tests', () => {
 
         fireEvent.change(screen.getByLabelText(/valor/i), { target: { value: '0' } });
         fireEvent.change(screen.getByLabelText(/moeda/i), { target: { value: 'BRL' } });
-        fireEvent.change(screen.getByLabelText(/descr/i), { target: { value: 'Teste' } });
+        fireEvent.change(screen.getByLabelText(/Descrição/i), { target: { value: '...' } });
         fireEvent.change(screen.getByLabelText(/data e hora/i), { target: { value: '2026-06-24T14:30' } });
 
         fireEvent.click(screen.getByRole('button', { name: /Criar trans/i }));
