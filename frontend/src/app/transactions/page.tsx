@@ -12,10 +12,10 @@ import Link from "next/link";
 export default function TransactionsPage() {
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [deleteError, setDeleteError] = useState<string | null>(null);
-    // A tela só controla em qual página estamos
+
     const [page, setPage] = useState<number>(0);
 
-    // Puxa os dados Custom Hook
+
     const {transactions, loading, error, totalPages} = useTransactions(page);
 
     const deleteMutation = useDeleteTransaction();

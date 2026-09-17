@@ -3,6 +3,24 @@ import { PagedResponse, Transaction, TransactionCreateRequest, TransactionUpdate
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
+export interface SuggestionRequest{
+  input: string;
+}
+export interface TransactionSuggestion{
+  amount: number;
+  type: 'INCOME'|'EXPENSE';
+  currency: string;
+  description: string;
+  occurredAt: string;
+  suggestedCategoryName: string;
+  confidence: 'LOW'|'MEDIUM'|'HIGH';
+}
+export interface SuggestResponse{
+  suggestion: TransactionSuggestion;
+  confidence: 'LOW'|'MEDIUM'|'HIGH';
+  rawInput: string;
+}
+
 export const transactionService = {
   list: async (page = 0, size = 10): Promise<PagedResponse<Transaction>> => {
     const response =  await fetch(`${API_URL}/transactions?page=${page}&size=${size}`);
@@ -24,8 +42,6 @@ export const transactionService = {
   },
 
   create: async (data: TransactionCreateRequest): Promise<Transaction> => {
-    // Implementado em SPEC-004 (C3)
-    // POST to /transactions endpoint
     const response = await fetch(`${API_URL}/transactions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
     if(!response.ok){
       throw new Error("Erro ao criar a Transação");
@@ -56,4 +72,16 @@ export const transactionService = {
       throw new Error('Erro ao excluir transação');
     }
   },
+  suggestTransaction: async (input: string): Promise<SuggestResponse> => {
+    const response =  await fetch(`${API_URL}/transactions/suggest`,{
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ input })
+    });
+    if (!response.ok){
+      throw new Error('Erro ao excluir suggest');
+    }
+    return response.json();
+  }
 }
+
