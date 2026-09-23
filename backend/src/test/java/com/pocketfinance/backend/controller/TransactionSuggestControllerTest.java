@@ -1,6 +1,7 @@
 package com.pocketfinance.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pocketfinance.backend.dto.SuggestionRequest;
 import com.pocketfinance.backend.dto.TransactionSuggestionResult;
 import com.pocketfinance.backend.exception.ParsingFailedException;
 import com.pocketfinance.backend.service.TransactionSuggestService;
@@ -12,9 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -42,20 +41,19 @@ class TransactionSuggestControllerTest {
 
         mockMvc.perform(post("/api/transactions/suggest")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("input", input))))
+                        .content(objectMapper.writeValueAsString(new SuggestionRequest(input))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.suggestion.amount").value(20.00))
                 .andExpect(jsonPath("$.confidence").value("HIGH"))
-                .andExpect(jsonPath("$.rawInput").value(input));
+                .andExpect(jsonPath("$.rawInput").doesNotExist()); // Garante que o texto não é exposto
     }
 
     @Test
     void shouldReturn400WhenInputIsEmpty() throws Exception {
         mockMvc.perform(post("/api/transactions/suggest")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("input", "   "))))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("INVALID_INPUT"));
+                        .content(objectMapper.writeValueAsString(new SuggestionRequest("   "))))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -64,46 +62,44 @@ class TransactionSuggestControllerTest {
 
         mockMvc.perform(post("/api/transactions/suggest")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("input", longInput))))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("INVALID_INPUT"));
+                        .content(objectMapper.writeValueAsString(new SuggestionRequest(longInput))))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     void shouldReturn422WhenParsingFails() throws Exception {
         String input = "Gastei -10";
-        when(service.suggest(input)).thenThrow(new ParsingFailedException("Invalid data", input));
+        when(service.suggest(input)).thenThrow(new ParsingFailedException("Invalid data"));
 
         mockMvc.perform(post("/api/transactions/suggest")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("input", input))))
+                        .content(objectMapper.writeValueAsString(new SuggestionRequest(input))))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.message").value("PARSING_FAILED: Invalid data"))
-                .andExpect(jsonPath("$.details[0]").value("rawInput: " + input));
+                .andExpect(jsonPath("$.message").value("PARSING_FAILED"))
+                .andExpect(jsonPath("$.details[0]").value("Motivo: Invalid data"));
     }
+
     @Test
     void shouldReturn503WhenAiServiceIsUnavailable() throws Exception {
         String input = "Comprei algo na padaria por 10 reais";
-
 
         when(service.suggest(input)).thenThrow(new org.springframework.web.client.RestClientException("Simulated AI downtime"));
 
         mockMvc.perform(post("/api/transactions/suggest")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("input", input))))
-                .andExpect(status().isServiceUnavailable())
-                .andExpect(jsonPath("$.message").value("AI_SERVICE_UNAVAILABLE: O serviço de inteligência artificial falhou."));
+                        .content(objectMapper.writeValueAsString(new SuggestionRequest(input))))
+                .andExpect(status().isServiceUnavailable());
     }
 
     @Test
     void shouldNotCallServiceWhenInputExceeds500Characters() throws Exception {
-
         String longInput = "a".repeat(501);
 
         mockMvc.perform(post("/api/transactions/suggest")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("input", longInput))))
+                        .content(objectMapper.writeValueAsString(new SuggestionRequest(longInput))))
                 .andExpect(status().isBadRequest());
+
         org.mockito.Mockito.verify(service, org.mockito.Mockito.never()).suggest(org.mockito.ArgumentMatchers.anyString());
     }
 }

@@ -1,6 +1,7 @@
 package com.pocketfinance.backend.adapter;
 
 import com.pocketfinance.backend.dto.TransactionSuggestionResult;
+import com.pocketfinance.backend.exception.ParsingFailedException; // Certifique-se de ter esta exceção criada
 import com.pocketfinance.backend.port.TransactionParserPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,11 +11,11 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
 import java.time.LocalDate;
 
 @Component
 public class SpringAiTransactionParser implements TransactionParserPort {
-
 
     private static final Logger log = LoggerFactory.getLogger(SpringAiTransactionParser.class);
 
@@ -32,26 +33,25 @@ public class SpringAiTransactionParser implements TransactionParserPort {
 
     private final ChatClient chatClient;
     private final BeanOutputConverter<TransactionSuggestionResult> converter;
+    private final Clock clock;
 
-    public SpringAiTransactionParser(ChatClient.Builder chatClientBuilder) {
+    public SpringAiTransactionParser(ChatClient.Builder chatClientBuilder, Clock clock) {
         this.chatClient = chatClientBuilder.build();
         this.converter = new BeanOutputConverter<>(TransactionSuggestionResult.class);
+        this.clock = clock;
     }
 
     @Override
     public TransactionSuggestionResult parse(String input) {
-        String currentDate = LocalDate.now().toString();
-
+        String currentDate = LocalDate.now(clock).toString();
 
         String promptWithDateAndFormat = String.format(SYSTEM_PROMPT, currentDate) + "\n" + converter.getFormat();
-
 
         ChatResponse response = chatClient.prompt()
                 .system(promptWithDateAndFormat)
                 .user(input)
                 .call()
                 .chatResponse();
-
 
         if (response != null && response.getMetadata() != null && response.getMetadata().getUsage() != null) {
             Usage usage = response.getMetadata().getUsage();
@@ -62,7 +62,22 @@ public class SpringAiTransactionParser implements TransactionParserPort {
         }
 
 
+        if (response == null || response.getResult() == null || response.getResult().getOutput() == null) {
+            throw new ParsingFailedException("Resposta nula da LLM");
+        }
+
         String content = response.getResult().getOutput().getText();
-        return converter.convert(content);
+        if (content == null || content.trim().isEmpty()) {
+            throw new ParsingFailedException("A LLM retornou um conteúdo vazio");
+        }
+
+
+        try {
+            return converter.convert(content);
+        } catch (Exception e) {
+
+            log.error("Erro ao converter resposta da LLM. Motivo técnico: {}", e.getMessage());
+            throw new ParsingFailedException("O formato retornado pela IA é inválido ou incompatível");
+        }
     }
 }

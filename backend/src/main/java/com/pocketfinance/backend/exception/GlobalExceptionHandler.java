@@ -140,18 +140,18 @@ public class GlobalExceptionHandler {
             ParsingFailedException ex,
             HttpServletRequest request
     ) {
-        List<String> details = List.of("rawInput: " + ex.getRawInput());
+        List<String> details = List.of("Motivo: " + ex.getMessage());
 
         ApiError apiError = new ApiError(
                 Instant.now(),
                 HttpStatus.UNPROCESSABLE_ENTITY.value(),
                 HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase(),
-                "PARSING_FAILED: " + ex.getMessage(),
+                "PARSING_FAILED",
                 request.getRequestURI(),
                 details
         );
 
-        logger.error("Falha ao parsear transação. input: {}", ex.getRawInput());
+        logger.error("Falha ao parsear transação na rota {}. Motivo: {}", request.getRequestURI(), ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(apiError);
     }

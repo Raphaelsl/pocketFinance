@@ -23,7 +23,7 @@ public class TransactionSuggestService {
 
         if (!validator.isValid(result)) {
 
-            throw new ParsingFailedException("A IA não retornou os dados no formato exigido.", input);
+            throw new ParsingFailedException("A IA não retornou os dados no formato exigido.");
         }
 
         return result;

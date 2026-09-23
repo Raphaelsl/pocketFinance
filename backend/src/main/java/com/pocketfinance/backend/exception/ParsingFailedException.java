@@ -1,14 +1,12 @@
 package com.pocketfinance.backend.exception;
 
 public class ParsingFailedException extends RuntimeException {
-    private final String rawInput;
 
-    public ParsingFailedException(String message, String rawInput) {
+    public ParsingFailedException(String message) {
         super(message);
-        this.rawInput = rawInput;
     }
 
-    public String getRawInput() {
-        return rawInput;
+    public ParsingFailedException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

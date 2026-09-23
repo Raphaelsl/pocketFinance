@@ -1,11 +1,12 @@
 package com.pocketfinance.backend.controller;
 
+import com.pocketfinance.backend.dto.SuggestionRequest;
+import com.pocketfinance.backend.dto.SuggestionResponse;
 import com.pocketfinance.backend.dto.TransactionSuggestionResult;
 import com.pocketfinance.backend.service.TransactionSuggestService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -18,30 +19,12 @@ public class TransactionSuggestController {
     }
 
     @PostMapping("/suggest")
-    public ResponseEntity<?> suggestTransaction(@RequestBody Map<String, String> payload) {
-        String input = payload.get("input");
+    public ResponseEntity<SuggestionResponse> suggestTransaction(@Valid @RequestBody SuggestionRequest request) {
 
-        if (input == null || input.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "error", "INVALID_INPUT",
-                    "message", "O texto de entrada não pode ser vazio."
-            ));
-        }
+        TransactionSuggestionResult suggestion = service.suggest(request.input());
 
-        if (input.length() > 500) {
-            return ResponseEntity.badRequest().body(Map.of(
-                    "error", "INVALID_INPUT",
-                    "message", "O texto de entrada não pode ultrapassar 500 caracteres."
-            ));
-        }
+        String confidence = suggestion.confidence() != null ? suggestion.confidence() : "UNKNOWN";
 
-
-        TransactionSuggestionResult suggestion = service.suggest(input);
-
-        return ResponseEntity.ok(Map.of(
-                "suggestion", suggestion,
-                "confidence", suggestion.confidence() != null ? suggestion.confidence() : "UNKNOWN",
-                "rawInput", input
-        ));
+        return ResponseEntity.ok(new SuggestionResponse(suggestion, confidence));
     }
 }
