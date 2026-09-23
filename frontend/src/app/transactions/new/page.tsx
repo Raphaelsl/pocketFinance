@@ -56,7 +56,6 @@ export default function NewTransactionsPage() {
         });
     };
     const handleAiError = (error: Error) => {
-        reset({ type: TransactionType.EXPENSE, currency: 'BRL' }); // Limpa o form para o estado inicial
 
         const errorMessage = error.message.includes("503")
             ? "Serviço indisponível. Use o formulário abaixo."
@@ -84,7 +83,6 @@ export default function NewTransactionsPage() {
             data.metadata = JSON.stringify({
                 source: "LLM",
                 model: "gpt-4o-mini",
-                rawInput: aiFeedback.rawInput,
                 confidence: aiFeedback.confidence
             });
         }

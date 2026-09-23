@@ -23,10 +23,10 @@ export interface SuggestResponse{
 
 export const transactionService = {
   list: async (page = 0, size = 10): Promise<PagedResponse<Transaction>> => {
-    const response =  await fetch(`${API_URL}/transactions?page=${page}&size=${size}`);
+    const response = await fetch(`${API_URL}/transactions?page=${page}&size=${size}`);
     //async: promessa de entrega
     //await : espera o resultado
-    if(!response.ok){
+    if (!response.ok) {
       throw new Error("Erro ao carregar a Transação");
     }
     return response.json();
@@ -42,8 +42,12 @@ export const transactionService = {
   },
 
   create: async (data: TransactionCreateRequest): Promise<Transaction> => {
-    const response = await fetch(`${API_URL}/transactions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-    if(!response.ok){
+    const response = await fetch(`${API_URL}/transactions`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    });
+    if (!response.ok) {
       throw new Error("Erro ao criar a Transação");
     }
     return response.json();
@@ -53,7 +57,7 @@ export const transactionService = {
   update: async (id: string, data: TransactionUpdateRequest): Promise<Transaction> => {
     const response = await fetch(`${API_URL}/transactions/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(data),
     });
     if (!response.ok) {
@@ -73,15 +77,26 @@ export const transactionService = {
     }
   },
   suggestTransaction: async (input: string): Promise<SuggestResponse> => {
-    const response =  await fetch(`${API_URL}/transactions/suggest`,{
+    const response = await fetch(`${API_URL}/transactions/suggest`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ input })
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({input})
     });
-    if (!response.ok){
-      throw new Error('Erro ao excluir suggest');
+
+    if (!response.ok) {
+      let errorData;
+      try {
+
+        errorData = await response.json();
+      } catch (e) {
+        errorData = {};
+      }
+
+      const safeMessage = errorData.message || 'Falha ao processar sugestão da IA';
+
+      throw new Error(`${response.status}: ${safeMessage}`);
     }
+
     return response.json();
   }
 }
-
