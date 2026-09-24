@@ -135,4 +135,44 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiError);
     }
+    @ExceptionHandler(ParsingFailedException.class)
+    public ResponseEntity<ApiError> handleParsingFailedException(
+            ParsingFailedException ex,
+            HttpServletRequest request
+    ) {
+        List<String> details = List.of("Motivo: " + ex.getMessage());
+
+        ApiError apiError = new ApiError(
+                Instant.now(),
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase(),
+                "PARSING_FAILED",
+                request.getRequestURI(),
+                details
+        );
+
+        logger.error("Falha ao parsear transação na rota {}. Motivo: {}", request.getRequestURI(), ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(apiError);
+    }
+
+
+    @ExceptionHandler({org.springframework.web.client.RestClientException.class, org.springframework.ai.retry.NonTransientAiException.class})
+    public ResponseEntity<ApiError> handleAiServiceException(
+            Exception ex,
+            HttpServletRequest request
+    ) {
+        ApiError apiError = new ApiError(
+                Instant.now(),
+                HttpStatus.SERVICE_UNAVAILABLE.value(),
+                HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase(),
+                "AI_SERVICE_UNAVAILABLE: O serviço de inteligência artificial falhou.",
+                request.getRequestURI(),
+                null
+        );
+
+        logger.error("Falha de comunicação com serviço de IA", ex);
+
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(apiError);
+    }
 }
