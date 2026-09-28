@@ -88,7 +88,7 @@ export const transactionService = {
       try {
 
         errorData = await response.json();
-      } catch (e) {
+      } catch {
         errorData = {};
       }
 
