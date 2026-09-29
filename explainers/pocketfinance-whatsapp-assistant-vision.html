@@ -1,0 +1,950 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f5ef">
+  <meta name="description" content="Conceito interativo para o PocketFinance como assistente financeiro conversacional no WhatsApp.">
+  <title>PocketFinance — seu dinheiro em conversa</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17251f;
+      --muted: #65736c;
+      --line: #dfe6df;
+      --paper: #f4f5ef;
+      --surface: #ffffff;
+      --forest: #123d2c;
+      --forest-2: #1a523c;
+      --leaf: #b9e769;
+      --leaf-soft: #edf7d9;
+      --whatsapp: #d9f5d2;
+      --amber: #f4bd58;
+      --red: #d46d5f;
+      --shadow: 0 24px 70px rgba(20, 48, 35, .12);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 84% 4%, rgba(185, 231, 105, .18), transparent 30rem),
+        var(--paper);
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 3px solid #4a9d6d;
+      outline-offset: 3px;
+    }
+    .wrap { width: min(1160px, calc(100% - 40px)); margin-inline: auto; }
+
+    .topbar {
+      position: sticky;
+      z-index: 20;
+      top: 0;
+      border-bottom: 1px solid rgba(223, 230, 223, .78);
+      background: rgba(244, 245, 239, .88);
+      backdrop-filter: blur(16px);
+    }
+    .topbar-inner {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .brand { display: inline-flex; align-items: center; gap: 11px; font-weight: 760; letter-spacing: -.035em; }
+    .brand-mark {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      border-radius: 13px;
+      color: var(--leaf);
+      background: var(--forest);
+      font-size: 15px;
+      font-weight: 850;
+      letter-spacing: -.08em;
+    }
+    .brand-name { font-size: 17px; }
+    .brand-name span { color: var(--muted); font-weight: 500; }
+    .nav { display: flex; align-items: center; gap: 28px; color: #4d5c54; font-size: 13px; font-weight: 620; }
+    .nav a:hover { color: var(--forest); }
+    .nav-cta {
+      padding: 11px 15px;
+      color: #fff !important;
+      background: var(--forest);
+      border-radius: 999px;
+      transition: transform .2s ease, background .2s ease;
+    }
+    .nav-cta:hover { background: var(--forest-2); transform: translateY(-1px); }
+
+    .hero { padding: 75px 0 68px; overflow: hidden; }
+    .hero-grid { display: grid; grid-template-columns: 1fr .93fr; align-items: center; gap: 64px; }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--forest-2);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+    .eyebrow-dot { width: 7px; height: 7px; background: #6caa4f; border-radius: 50%; box-shadow: 0 0 0 4px rgba(108, 170, 79, .14); }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      max-width: 620px;
+      margin: 18px 0 19px;
+      color: var(--forest);
+      font-size: clamp(48px, 6.2vw, 76px);
+      font-weight: 780;
+      letter-spacing: -.075em;
+      line-height: .98;
+    }
+    h1 em { color: #67934c; font-style: normal; }
+    .hero-copy > p { max-width: 520px; margin-bottom: 28px; color: #58675e; font-size: 17px; line-height: 1.65; }
+    .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 13px; }
+    .button-primary, .button-secondary {
+      display: inline-flex;
+      min-height: 46px;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 0 18px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 750;
+      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .button-primary { color: #fff; background: var(--forest); box-shadow: 0 9px 22px rgba(18, 61, 44, .16); }
+    .button-primary:hover { background: var(--forest-2); box-shadow: 0 12px 24px rgba(18, 61, 44, .2); transform: translateY(-2px); }
+    .button-secondary { border-color: var(--line); color: var(--ink); background: rgba(255,255,255,.62); }
+    .button-secondary:hover { background: white; transform: translateY(-2px); }
+    .arrow { font-size: 17px; line-height: 1; }
+    .hero-note { display: flex; align-items: center; gap: 8px; margin-top: 22px; color: #738077; font-size: 11px; }
+    .hero-note svg { flex: 0 0 auto; color: #55825d; }
+
+    .hero-visual { position: relative; display: grid; place-items: center; min-height: 628px; }
+    .visual-orbit {
+      position: absolute;
+      width: 520px;
+      height: 520px;
+      border: 1px solid rgba(18, 61, 44, .08);
+      border-radius: 50%;
+    }
+    .visual-orbit::before, .visual-orbit::after {
+      position: absolute;
+      content: "";
+      border: 1px solid rgba(18, 61, 44, .07);
+      border-radius: 50%;
+      inset: 42px;
+    }
+    .visual-orbit::after { inset: 84px; }
+    .phone {
+      position: relative;
+      z-index: 1;
+      width: min(352px, 84vw);
+      min-height: 598px;
+      padding: 10px;
+      overflow: hidden;
+      border: 1px solid #d3ddd5;
+      border-radius: 40px;
+      background: #fbfcfa;
+      box-shadow: 0 35px 90px rgba(18, 61, 44, .2), 0 3px 9px rgba(18, 61, 44, .08);
+      transform: rotate(1.4deg);
+    }
+    .phone::before {
+      position: absolute;
+      z-index: 3;
+      top: 9px;
+      left: 50%;
+      width: 78px;
+      height: 17px;
+      content: "";
+      border-radius: 0 0 12px 12px;
+      background: #17251f;
+      transform: translateX(-50%);
+    }
+    .phone-screen { min-height: 578px; overflow: hidden; border-radius: 31px; background: #f1f4ee; }
+    .chat-top {
+      display: flex;
+      min-height: 69px;
+      align-items: center;
+      gap: 10px;
+      padding: 21px 14px 9px;
+      color: #fff;
+      background: #174b35;
+    }
+    .back-arrow { color: #dcece3; font-size: 21px; }
+    .avatar {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      flex: 0 0 auto;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--forest);
+      background: var(--leaf);
+      font-size: 12px;
+      font-weight: 850;
+    }
+    .chat-title { flex: 1; line-height: 1.2; }
+    .chat-title strong { display: block; font-size: 12px; }
+    .chat-title span { color: #c4d9cc; font-size: 10px; }
+    .verified { display: inline-grid; width: 14px; height: 14px; margin-left: 3px; place-items: center; border-radius: 50%; color: #174b35; background: #b9e769; font-size: 9px; }
+    .chat-menu { color: #dcece3; font-size: 19px; }
+    .chat-thread {
+      display: flex;
+      min-height: 465px;
+      flex-direction: column;
+      gap: 11px;
+      padding: 17px 12px 12px;
+      background-color: #eef2e9;
+      background-image: radial-gradient(rgba(46, 87, 59, .055) .7px, transparent .7px);
+      background-size: 15px 15px;
+    }
+    .day-pill { align-self: center; padding: 5px 10px; border: 1px solid #e4e9e2; border-radius: 99px; color: #78857c; background: rgba(255,255,255,.85); font-size: 9px; font-weight: 700; }
+    .bubble {
+      max-width: 88%;
+      padding: 10px 11px 8px;
+      border-radius: 13px;
+      color: #29372f;
+      background: #fff;
+      box-shadow: 0 1px 2px rgba(20, 40, 29, .08);
+      font-size: 11px;
+      line-height: 1.48;
+    }
+    .bubble-user { align-self: flex-end; border-top-right-radius: 4px; background: var(--whatsapp); }
+    .bubble-bot { align-self: flex-start; border-top-left-radius: 4px; }
+    .bubble-time { display: block; margin-top: 3px; color: #8b968e; font-size: 8px; text-align: right; }
+    .preview-card { margin-top: 9px; padding: 11px; border: 1px solid #e7ebe4; border-radius: 11px; background: #fbfcf9; }
+    .preview-label { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; color: #718078; font-size: 9px; font-weight: 700; }
+    .draft-chip { padding: 4px 7px; border-radius: 99px; color: #856112; background: #fcf1d7; font-size: 8px; font-weight: 800; }
+    .draft-chip.saved { color: #28663f; background: #e4f4dd; }
+    .draft-amount { margin-bottom: 10px; color: var(--forest); font-size: 22px; font-weight: 800; letter-spacing: -.04em; }
+    .draft-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px 10px; }
+    .draft-field small { display: block; margin-bottom: 3px; color: #8b958e; font-size: 8px; }
+    .draft-field strong { display: block; color: #34443a; font-size: 10px; font-weight: 730; }
+    .confirm-note { margin: 9px 0 0; color: #68776c; font-size: 9px; line-height: 1.4; }
+    .chat-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 10px; }
+    .chat-action {
+      min-height: 34px;
+      padding: 7px;
+      border: 1px solid #dce5dc;
+      border-radius: 8px;
+      color: #244e37;
+      background: white;
+      font-size: 9px;
+      font-weight: 760;
+    }
+    .chat-action.primary { grid-column: 1 / -1; border-color: #1a6546; color: white; background: #1a6546; }
+    .chat-action:hover { filter: brightness(.97); }
+    .edit-panel { display: none; margin-top: 9px; padding: 9px; border: 1px solid #e0e8de; border-radius: 10px; background: #f5f8f2; }
+    .edit-panel.open { display: block; }
+    .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .edit-panel label { display: block; color: #708076; font-size: 8px; }
+    .edit-panel input, .edit-panel select { width: 100%; height: 30px; margin-top: 3px; padding: 0 7px; border: 1px solid #dbe3d8; border-radius: 7px; color: #26372c; background: white; font-size: 9px; }
+    .edit-save { width: 100%; min-height: 29px; margin-top: 8px; border: 0; border-radius: 7px; color: white; background: #335f40; font-size: 9px; font-weight: 750; }
+    .chat-compose { display: flex; align-items: center; gap: 8px; min-height: 42px; padding: 6px 9px; border-radius: 24px; background: white; }
+    .compose-plus { color: #718078; font-size: 17px; }
+    .compose-placeholder { flex: 1; color: #9aa39c; font-size: 10px; }
+    .compose-mic { display: grid; width: 28px; height: 28px; place-items: center; border-radius: 50%; color: white; background: #1e6648; font-size: 11px; }
+    .phone-home { position: absolute; bottom: 3px; left: 50%; width: 85px; height: 4px; border-radius: 9px; background: #213329; transform: translateX(-50%); }
+    .float-tag { position: absolute; z-index: 2; display: flex; align-items: center; gap: 9px; padding: 11px 14px; border: 1px solid rgba(219, 228, 218, .8); border-radius: 14px; background: rgba(255,255,255,.9); box-shadow: 0 12px 32px rgba(30, 61, 43, .11); }
+    .float-tag.one { top: 112px; left: 3px; transform: rotate(-4deg); }
+    .float-tag.two { right: -4px; bottom: 105px; transform: rotate(3deg); }
+    .float-icon { display: grid; width: 29px; height: 29px; place-items: center; border-radius: 10px; color: #2a6841; background: var(--leaf-soft); font-size: 14px; }
+    .float-tag strong { display: block; font-size: 10px; }
+    .float-tag small { display: block; margin-top: 2px; color: var(--muted); font-size: 8px; }
+
+    .trust-strip { padding: 18px 0 30px; }
+    .trust-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 22px; border: 1px solid rgba(223,230,223,.9); border-radius: 16px; background: rgba(255,255,255,.55); }
+    .trust-lead { display: flex; align-items: center; gap: 10px; color: var(--forest); font-size: 12px; font-weight: 780; }
+    .trust-lead span { display: grid; width: 28px; height: 28px; place-items: center; border-radius: 50%; color: #fff; background: var(--forest); }
+    .trust-points { display: flex; flex-wrap: wrap; gap: 20px; color: #607067; font-size: 10px; font-weight: 650; }
+    .trust-points span::before { content: "✓"; margin-right: 6px; color: #579158; font-weight: 900; }
+
+    section.content-section { padding: 88px 0; }
+    .section-head { max-width: 640px; margin-bottom: 34px; }
+    .section-head h2 { margin: 12px 0 11px; color: var(--forest); font-size: clamp(33px, 4.3vw, 48px); font-weight: 760; letter-spacing: -.06em; line-height: 1.05; }
+    .section-head p { margin-bottom: 0; color: var(--muted); font-size: 15px; line-height: 1.65; }
+    .section-head.center { margin-inline: auto; text-align: center; }
+    .center .eyebrow { justify-content: center; }
+    .flow-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+    .flow-card {
+      position: relative;
+      min-height: 218px;
+      padding: 24px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: rgba(255,255,255,.78);
+    }
+    .flow-card::after { position: absolute; right: -35px; bottom: -45px; width: 150px; height: 150px; content: ""; border: 1px solid rgba(18,61,44,.08); border-radius: 50%; }
+    .flow-number { display: grid; width: 34px; height: 34px; place-items: center; margin-bottom: 27px; border-radius: 11px; color: var(--forest); background: var(--leaf-soft); font-size: 12px; font-weight: 850; }
+    .flow-card h3 { margin-bottom: 8px; color: var(--forest); font-size: 17px; letter-spacing: -.03em; }
+    .flow-card p { max-width: 290px; margin-bottom: 0; color: #718077; font-size: 12px; line-height: 1.6; }
+    .flow-connector { position: absolute; z-index: 1; top: 42px; right: -17px; width: 33px; height: 1px; background: #aab8aa; }
+
+    .demo-section { position: relative; padding: 83px 0 90px !important; color: #ecf4eb; background: var(--forest); }
+    .demo-section::before { position: absolute; top: -80px; right: 8%; width: 300px; height: 300px; content: ""; border: 1px solid rgba(185,231,105,.15); border-radius: 50%; }
+    .demo-section .section-head h2 { color: #f3f7ee; }
+    .demo-section .section-head p { color: #b5c7b9; }
+    .demo-section .eyebrow { color: var(--leaf); }
+    .demo-layout { display: grid; grid-template-columns: .72fr 1.28fr; align-items: center; gap: 50px; }
+    .demo-copy h2 { max-width: 410px; margin: 13px 0 14px; color: #f3f7ee; font-size: clamp(34px, 4vw, 46px); letter-spacing: -.06em; line-height: 1.04; }
+    .demo-copy > p { max-width: 390px; color: #b5c7b9; font-size: 14px; line-height: 1.7; }
+    .demo-tabs { display: grid; gap: 8px; margin-top: 26px; }
+    .demo-tab {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 13px;
+      border: 1px solid rgba(235,246,235,.13);
+      border-radius: 12px;
+      color: #d8e4d9;
+      background: rgba(255,255,255,.045);
+      text-align: left;
+      transition: background .18s ease, border .18s ease, transform .18s ease;
+    }
+    .demo-tab:hover { background: rgba(255,255,255,.085); transform: translateX(2px); }
+    .demo-tab[aria-pressed="true"] { border-color: rgba(185,231,105,.63); color: #fff; background: rgba(185,231,105,.13); }
+    .tab-icon { display: grid; width: 31px; height: 31px; flex: 0 0 auto; place-items: center; border-radius: 10px; color: var(--leaf); background: rgba(185,231,105,.13); font-size: 14px; }
+    .demo-tab strong { display: block; font-size: 11px; }
+    .demo-tab small { display: block; margin-top: 3px; color: #aabdaf; font-size: 9px; }
+    .demo-disclaimer { margin: 15px 0 0; color: #9fb4a3; font-size: 9px; line-height: 1.5; }
+    .demo-stage { display: grid; place-items: center; min-height: 565px; border: 1px solid rgba(221,241,222,.14); border-radius: 28px; background: rgba(255,255,255,.06); }
+    .demo-stage .phone { min-height: 570px; transform: rotate(0); }
+    .demo-stage .phone-screen { min-height: 550px; }
+    .demo-stage .chat-thread { min-height: 438px; }
+    .demo-panel { display: none; width: 100%; }
+    .demo-panel.active { display: block; }
+    .query-number { margin: 8px 0 7px; color: var(--forest); font-size: 27px; font-weight: 820; letter-spacing: -.05em; }
+    .query-breakdown { display: grid; gap: 8px; margin-top: 12px; padding-top: 11px; border-top: 1px solid #e8ece6; }
+    .query-row { display: flex; justify-content: space-between; gap: 10px; color: #66756b; font-size: 9px; }
+    .query-row strong { color: #35463a; }
+    .answer-cta { display: inline-flex; align-items: center; gap: 5px; margin-top: 12px; color: #276342; font-size: 9px; font-weight: 800; }
+    .correction-summary { margin-top: 10px; padding: 10px; border-radius: 10px; background: #f5f8f2; }
+    .correction-summary strong { display: block; color: var(--forest); font-size: 11px; }
+    .correction-summary span { display: block; margin-top: 4px; color: #718077; font-size: 9px; }
+
+    .dashboard-section { background: #e9eee7; }
+    .dashboard-intro { display: flex; align-items: end; justify-content: space-between; gap: 25px; margin-bottom: 31px; }
+    .dashboard-intro .section-head { margin-bottom: 0; }
+    .dashboard-caption { max-width: 240px; padding-bottom: 5px; color: #6d7d72; font-size: 10px; line-height: 1.55; }
+    .browser-frame { overflow: hidden; border: 1px solid #d8e0d8; border-radius: 18px; background: white; box-shadow: var(--shadow); }
+    .browser-bar { display: flex; height: 42px; align-items: center; gap: 6px; padding: 0 15px; border-bottom: 1px solid #e5eae4; background: #fbfcfa; }
+    .browser-dot { width: 8px; height: 8px; border-radius: 50%; background: #d3dbd1; }
+    .browser-address { width: 42%; height: 20px; margin-left: 8px; border: 1px solid #edf0eb; border-radius: 99px; background: white; }
+    .app-layout { display: grid; min-height: 420px; grid-template-columns: 170px 1fr; }
+    .app-sidebar { padding: 23px 13px; border-right: 1px solid #e8ece7; background: #fbfcfa; }
+    .app-brand { display: flex; align-items: center; gap: 8px; margin-bottom: 28px; padding-left: 5px; color: var(--forest); font-size: 11px; font-weight: 820; }
+    .app-brand .brand-mark { width: 26px; height: 26px; border-radius: 9px; font-size: 10px; }
+    .sidebar-label { margin: 19px 0 8px 7px; color: #9aa49c; font-size: 8px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .side-link { display: flex; align-items: center; gap: 9px; margin: 3px 0; padding: 9px 8px; border-radius: 8px; color: #6a786e; font-size: 9px; font-weight: 630; }
+    .side-link.active { color: #24563a; background: #eaf4e1; font-weight: 780; }
+    .side-icon { width: 14px; text-align: center; font-size: 12px; }
+    .app-main { min-width: 0; padding: 24px 26px 26px; }
+    .app-heading { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 18px; }
+    .app-heading h3 { margin: 0 0 4px; color: #1c3024; font-size: 17px; letter-spacing: -.04em; }
+    .app-heading p { margin: 0; color: #88948a; font-size: 9px; }
+    .period-select { padding: 8px 10px; border: 1px solid #e1e8e0; border-radius: 8px; color: #435448; background: white; font-size: 9px; }
+    .new-entry { padding: 9px 12px; border: 0; border-radius: 8px; color: white; background: var(--forest); font-size: 9px; font-weight: 750; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+    .kpi { padding: 12px; border: 1px solid #e7ece6; border-radius: 11px; background: white; }
+    .kpi-label { color: #88948b; font-size: 8px; font-weight: 650; }
+    .kpi-value { margin-top: 7px; color: #203629; font-size: 17px; font-weight: 790; letter-spacing: -.045em; }
+    .kpi-foot { margin-top: 5px; color: #758378; font-size: 8px; }
+    .kpi-foot.up { color: #398052; }
+    .dash-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 10px; margin-top: 11px; }
+    .dash-card { min-width: 0; padding: 14px; border: 1px solid #e7ece6; border-radius: 11px; background: white; }
+    .dash-card-head { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+    .dash-card-head strong { color: #2a3c30; font-size: 9px; }
+    .dash-card-head span { color: #98a39a; font-size: 8px; }
+    .chart { display: flex; height: 120px; align-items: end; justify-content: space-around; gap: 11px; padding: 6px 5px 0; border-bottom: 1px solid #e9eee8; }
+    .month-col { display: flex; height: 100%; flex: 1; flex-direction: column; align-items: center; justify-content: end; gap: 5px; }
+    .bars { display: flex; width: 100%; height: 92px; align-items: end; justify-content: center; gap: 3px; }
+    .bar { width: 10px; min-height: 4px; border-radius: 4px 4px 1px 1px; background: #7bac5f; }
+    .bar.expense { background: #edb55a; }
+    .month-col small { padding-bottom: 7px; color: #929d94; font-size: 7px; }
+    .chart-legend { display: flex; gap: 13px; margin-top: 10px; color: #718077; font-size: 8px; }
+    .legend-key { display: inline-flex; align-items: center; gap: 5px; }
+    .legend-key i { width: 7px; height: 7px; border-radius: 2px; background: #7bac5f; }
+    .legend-key i.expense { background: #edb55a; }
+    .category-list { display: grid; gap: 10px; }
+    .category-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; align-items: center; }
+    .category-row span { color: #536258; font-size: 8px; }
+    .category-row strong { color: #283a2e; font-size: 8px; }
+    .category-track { grid-column: 1 / -1; height: 4px; overflow: hidden; border-radius: 4px; background: #edf1eb; }
+    .category-fill { height: 100%; border-radius: inherit; background: #86ad69; }
+    .recent-table { width: 100%; margin-top: 10px; border-collapse: collapse; }
+    .recent-table th { padding: 8px 5px; border-bottom: 1px solid #edf0eb; color: #9aa39b; font-size: 7px; font-weight: 700; text-align: left; }
+    .recent-table td { padding: 9px 5px; border-bottom: 1px solid #f0f2ef; color: #536258; font-size: 8px; }
+    .recent-table td:last-child { color: #25392c; font-weight: 750; text-align: right; }
+    .source-pill { padding: 3px 6px; border-radius: 99px; color: #447544; background: #eff6e8; font-size: 7px; font-weight: 750; }
+
+    .principles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .principle { padding: 18px; border: 1px solid var(--line); border-radius: 15px; background: rgba(255,255,255,.7); }
+    .principle-icon { margin-bottom: 13px; color: #67934c; font-size: 17px; }
+    .principle strong { display: block; margin-bottom: 6px; color: var(--forest); font-size: 11px; }
+    .principle p { margin: 0; color: #738077; font-size: 10px; line-height: 1.55; }
+    .scope-grid { display: grid; grid-template-columns: 1.15fr 1fr 1fr; gap: 13px; }
+    .scope-card { min-height: 193px; padding: 22px; border: 1px solid var(--line); border-radius: 17px; background: white; }
+    .scope-card.primary { border-color: #d8e6cd; background: linear-gradient(145deg, #fafff3, #fff); }
+    .scope-card h3 { display: flex; align-items: center; gap: 8px; margin-bottom: 13px; color: var(--forest); font-size: 14px; letter-spacing: -.025em; }
+    .scope-tag { padding: 4px 7px; border-radius: 99px; color: #456947; background: #eaf4e1; font-size: 8px; letter-spacing: .06em; text-transform: uppercase; }
+    .scope-card ul { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+    .scope-card li { display: flex; align-items: start; gap: 8px; color: #627168; font-size: 10px; line-height: 1.4; }
+    .scope-card li::before { content: "•"; color: #6f9b54; font-size: 16px; line-height: 10px; }
+    .scope-card.later li::before { color: #c5a35e; }
+    .scope-card.out li::before { color: #bb7467; }
+    .final-cta { display: flex; align-items: center; justify-content: space-between; gap: 25px; padding: 30px 34px; border-radius: 22px; color: #fff; background: var(--forest); }
+    .final-cta h2 { margin: 0 0 6px; color: #f4f8f1; font-size: 24px; letter-spacing: -.05em; }
+    .final-cta p { max-width: 580px; margin: 0; color: #bed0c2; font-size: 11px; line-height: 1.55; }
+    .final-cta .button-primary { flex: 0 0 auto; color: var(--forest); background: var(--leaf); box-shadow: none; }
+    .final-cta .button-primary:hover { background: #c7ed7d; }
+    footer { padding: 24px 0 35px; color: #77847a; font-size: 9px; }
+    .footer-inner { display: flex; justify-content: space-between; gap: 20px; }
+    .footer-inner strong { color: #425447; }
+
+    @media (max-width: 900px) {
+      .hero { padding-top: 52px; }
+      .hero-grid { grid-template-columns: 1fr .85fr; gap: 20px; }
+      .hero-visual { min-height: 610px; }
+      .visual-orbit { width: 410px; height: 410px; }
+      .float-tag.one { left: -8px; }
+      .float-tag.two { right: -10px; }
+      .demo-layout { grid-template-columns: .65fr 1.35fr; gap: 25px; }
+      .app-layout { grid-template-columns: 142px 1fr; }
+      .app-main { padding-inline: 17px; }
+    }
+    @media (max-width: 700px) {
+      .wrap { width: min(100% - 28px, 540px); }
+      .topbar-inner { min-height: 65px; }
+      .brand-mark { width: 34px; height: 34px; }
+      .nav { gap: 14px; }
+      .nav a:not(.nav-cta) { display: none; }
+      .nav-cta { padding: 10px 13px; font-size: 11px; }
+      .hero { padding: 48px 0 34px; }
+      .hero-grid { grid-template-columns: 1fr; gap: 4px; }
+      h1 { max-width: 470px; font-size: clamp(49px, 13vw, 70px); }
+      .hero-copy > p { max-width: 470px; font-size: 15px; }
+      .hero-visual { min-height: 626px; margin: -6px -9px 0; }
+      .phone { width: min(348px, 88vw); }
+      .visual-orbit { width: min(490px, 105vw); height: min(490px, 105vw); }
+      .float-tag.one { top: 75px; left: 1%; }
+      .float-tag.two { right: 0; bottom: 75px; }
+      .trust-inner { align-items: start; padding: 16px; }
+      .trust-points { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-left: 38px; }
+      section.content-section { padding: 65px 0; }
+      .section-head { margin-bottom: 25px; }
+      .flow-grid { grid-template-columns: 1fr; }
+      .flow-card { min-height: 160px; padding: 20px; }
+      .flow-number { margin-bottom: 15px; }
+      .flow-connector { display: none; }
+      .demo-layout { grid-template-columns: 1fr; gap: 22px; }
+      .demo-copy h2 { max-width: 520px; }
+      .demo-tabs { grid-template-columns: 1fr; }
+      .demo-stage { min-height: auto; padding: 15px 4px; }
+      .demo-stage .phone { width: min(350px, 88vw); }
+      .dashboard-intro { display: block; }
+      .dashboard-caption { margin-top: 13px; }
+      .browser-frame { overflow-x: auto; }
+      .browser-bar, .app-layout { min-width: 680px; }
+      .principles { grid-template-columns: 1fr 1fr; }
+      .scope-grid { grid-template-columns: 1fr; }
+      .scope-card { min-height: 0; }
+      .final-cta { align-items: start; flex-direction: column; padding: 25px; }
+      .footer-inner { flex-direction: column; }
+    }
+    @media (max-width: 390px) {
+      .brand-name { font-size: 15px; }
+      .hero-actions { align-items: stretch; flex-direction: column; }
+      .hero-actions a { width: 100%; }
+      .hero-visual { min-height: 600px; }
+      .float-tag { padding: 8px 10px; }
+      .float-tag.one { left: -3px; }
+      .float-tag.two { right: -3px; }
+      .trust-points { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="#inicio" aria-label="PocketFinance, início">
+        <span class="brand-mark" aria-hidden="true">pf</span>
+        <span class="brand-name">PocketFinance <span>/ conceito</span></span>
+      </a>
+      <nav class="nav" aria-label="Navegação principal">
+        <a href="#fluxo">Como funciona</a>
+        <a href="#painel">Painel web</a>
+        <a class="nav-cta" href="#escopo">Ver proposta <span class="arrow" aria-hidden="true">↘</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="inicio">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow"><span class="eyebrow-dot"></span> Uma nova forma de cuidar do dinheiro</span>
+          <h1>Seu dinheiro.<br><em>Em conversa.</em></h1>
+          <p>Registre gastos e entenda para onde seu dinheiro vai — falando com o PocketFinance no WhatsApp, sem preencher uma planilha a cada compra.</p>
+          <div class="hero-actions">
+            <a class="button-primary" href="#demonstracao">Explorar a conversa <span class="arrow" aria-hidden="true">↗</span></a>
+            <a class="button-secondary" href="#painel">Ver o painel web</a>
+          </div>
+          <div class="hero-note">
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 2.3 16 4.6v4.7c0 4-2.5 6.7-6 8.4-3.5-1.7-6-4.4-6-8.4V4.6l6-2.3Z" stroke="currentColor" stroke-width="1.5"/><path d="m7.4 9.7 1.7 1.7 3.6-3.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Conceito de produto. A IA sugere; você revisa e confirma.
+          </div>
+        </div>
+
+        <div class="hero-visual" aria-label="Prévia de uma conversa com o assistente PocketFinance">
+          <div class="visual-orbit" aria-hidden="true"></div>
+          <div class="float-tag one" aria-hidden="true">
+            <span class="float-icon">✳</span>
+            <span><strong>Sem abrir planilha</strong><small>um lançamento em segundos</small></span>
+          </div>
+          <div class="phone" aria-hidden="true">
+            <div class="phone-screen">
+              <div class="chat-top">
+                <span class="back-arrow">‹</span>
+                <span class="avatar">pf</span>
+                <span class="chat-title"><strong>PocketFinance <i class="verified">✓</i></strong><span>assistente financeiro</span></span>
+                <span class="chat-menu">⋮</span>
+              </div>
+              <div class="chat-thread">
+                <span class="day-pill">HOJE</span>
+                <div class="bubble bubble-user">Gastei R$ 42,90 no almoço hoje.<span class="bubble-time">12:41 ✓✓</span></div>
+                <div class="bubble bubble-bot">
+                  Entendi assim. Confere antes de eu registrar?
+                  <div class="preview-card">
+                    <div class="preview-label">RASCUNHO <span class="draft-chip">aguardando você</span></div>
+                    <div class="draft-amount">− R$ 42,90</div>
+                    <div class="draft-grid">
+                      <div class="draft-field"><small>TIPO</small><strong>Despesa</strong></div>
+                      <div class="draft-field"><small>CATEGORIA</small><strong>Alimentação</strong></div>
+                      <div class="draft-field"><small>DATA</small><strong>Hoje</strong></div>
+                      <div class="draft-field"><small>DESCRIÇÃO</small><strong>Almoço</strong></div>
+                    </div>
+                    <p class="confirm-note">Nada foi salvo ainda. Você pode corrigir qualquer campo.</p>
+                    <div class="chat-actions">
+                      <button class="chat-action primary" type="button">Confirmar lançamento</button>
+                      <button class="chat-action" type="button">Editar</button>
+                      <button class="chat-action" type="button">Cancelar</button>
+                    </div>
+                  </div>
+                  <span class="bubble-time">12:41</span>
+                </div>
+              </div>
+            </div>
+            <span class="phone-home"></span>
+          </div>
+          <div class="float-tag two" aria-hidden="true">
+            <span class="float-icon">↗</span>
+            <span><strong>Você decide</strong><small>confirmação antes de salvar</small></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="trust-strip">
+      <div class="wrap trust-inner">
+        <div class="trust-lead"><span>✓</span> O controle continua com você</div>
+        <div class="trust-points">
+          <span>Sem gravação automática</span>
+          <span>Dados conferidos pelas regras do app</span>
+          <span>Dashboard com seus lançamentos</span>
+        </div>
+      </div>
+    </div>
+
+    <section class="content-section" id="fluxo">
+      <div class="wrap">
+        <div class="section-head center">
+          <span class="eyebrow">Pouca fricção, com controle</span>
+          <h2>Uma conversa curta.<br>Um registro confiável.</h2>
+          <p>O caminho é simples para quem usa. Por trás, cada sugestão vira um rascunho validado antes de entrar no seu histórico.</p>
+        </div>
+        <div class="flow-grid">
+          <article class="flow-card">
+            <span class="flow-number">01</span>
+            <h3>Conte o que aconteceu</h3>
+            <p>“Recebi R$ 300 da aula de inglês hoje.” Texto natural, sem formulário para preencher campo por campo.</p>
+            <span class="flow-connector" aria-hidden="true"></span>
+          </article>
+          <article class="flow-card">
+            <span class="flow-number">02</span>
+            <h3>Confira a sugestão</h3>
+            <p>Valor, tipo, categoria e data aparecem como rascunho. Se faltar informação, o assistente pergunta.</p>
+            <span class="flow-connector" aria-hidden="true"></span>
+          </article>
+          <article class="flow-card">
+            <span class="flow-number">03</span>
+            <h3>Confirme e acompanhe</h3>
+            <p>Depois da confirmação, o lançamento entra no histórico e atualiza os totais do dashboard.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section demo-section" id="demonstracao">
+      <div class="wrap demo-layout">
+        <div class="demo-copy">
+          <span class="eyebrow"><span class="eyebrow-dot"></span> Experimente a ideia</span>
+          <h2>O chat resolve o momento.<br>O painel mostra o todo.</h2>
+          <p>Escolha um cenário para ver como a conversa pode funcionar. Os números e mensagens são ilustrativos; os controles são uma simulação de UX.</p>
+          <div class="demo-tabs" role="group" aria-label="Cenários da conversa">
+            <button class="demo-tab" type="button" data-tab="register" aria-pressed="true">
+              <span class="tab-icon">＋</span><span><strong>Registrar uma despesa</strong><small>Entender, revisar e confirmar</small></span>
+            </button>
+            <button class="demo-tab" type="button" data-tab="query" aria-pressed="false">
+              <span class="tab-icon">⌕</span><span><strong>Perguntar sobre o mês</strong><small>Responder com dados registrados</small></span>
+            </button>
+            <button class="demo-tab" type="button" data-tab="correct" aria-pressed="false">
+              <span class="tab-icon">↻</span><span><strong>Corrigir um lançamento</strong><small>Editar sem recomeçar</small></span>
+            </button>
+          </div>
+          <p class="demo-disclaimer">Para responder valores, o sistema consulta os lançamentos e faz os cálculos no backend. O modelo não inventa totais.</p>
+        </div>
+
+        <div class="demo-stage">
+          <div class="demo-panel active" data-panel="register">
+            <div class="phone">
+              <div class="phone-screen">
+                <div class="chat-top"><span class="back-arrow">‹</span><span class="avatar">pf</span><span class="chat-title"><strong>PocketFinance <i class="verified">✓</i></strong><span>assistente financeiro</span></span><span class="chat-menu">⋮</span></div>
+                <div class="chat-thread">
+                  <span class="day-pill">HOJE</span>
+                  <div class="bubble bubble-user">Gastei R$ 42,90 no almoço hoje.<span class="bubble-time">12:41 ✓✓</span></div>
+                  <div class="bubble bubble-bot">
+                    Entendi assim. Confere antes de eu registrar?
+                    <div class="preview-card">
+                      <div class="preview-label">RASCUNHO <span class="draft-chip" id="draftStatus">aguardando você</span></div>
+                      <div class="draft-amount" id="draftAmount">− R$ 42,90</div>
+                      <div class="draft-grid">
+                        <div class="draft-field"><small>TIPO</small><strong>Despesa</strong></div>
+                        <div class="draft-field"><small>CATEGORIA</small><strong id="draftCategory">Alimentação</strong></div>
+                        <div class="draft-field"><small>DATA</small><strong>Hoje</strong></div>
+                        <div class="draft-field"><small>DESCRIÇÃO</small><strong>Almoço</strong></div>
+                      </div>
+                      <p class="confirm-note" id="confirmNote">Nada foi salvo ainda. Você pode corrigir qualquer campo.</p>
+                      <div class="edit-panel" id="editPanel">
+                        <div class="edit-grid">
+                          <label for="editAmount">Valor<input id="editAmount" inputmode="decimal" value="42,90"></label>
+                          <label for="editCategory">Categoria
+                            <select id="editCategory">
+                              <option>Alimentação</option><option>Transporte</option><option>Moradia</option><option>Saúde</option>
+                            </select>
+                          </label>
+                        </div>
+                        <button class="edit-save" id="saveEdit" type="button">Atualizar rascunho</button>
+                      </div>
+                      <div class="chat-actions">
+                        <button class="chat-action primary" id="confirmRecord" type="button">Confirmar lançamento</button>
+                        <button class="chat-action" id="editRecord" type="button">Editar</button>
+                        <button class="chat-action" id="cancelRecord" type="button">Cancelar</button>
+                      </div>
+                    </div>
+                    <span class="bubble-time">12:41</span>
+                  </div>
+                  <div class="bubble bubble-bot" id="savedReply" hidden>Pronto, registrei. Seu painel já foi atualizado. <span class="bubble-time">12:42</span></div>
+                  <div class="chat-compose"><span class="compose-plus">＋</span><span class="compose-placeholder">Mensagem</span><span class="compose-mic">⌁</span></div>
+                </div>
+              </div>
+              <span class="phone-home"></span>
+            </div>
+          </div>
+
+          <div class="demo-panel" data-panel="query">
+            <div class="phone">
+              <div class="phone-screen">
+                <div class="chat-top"><span class="back-arrow">‹</span><span class="avatar">pf</span><span class="chat-title"><strong>PocketFinance <i class="verified">✓</i></strong><span>assistente financeiro</span></span><span class="chat-menu">⋮</span></div>
+                <div class="chat-thread">
+                  <span class="day-pill">SETEMBRO</span>
+                  <div class="bubble bubble-user">Quanto gastei com alimentação este mês?<span class="bubble-time">18:06 ✓✓</span></div>
+                  <div class="bubble bubble-bot">
+                    Até agora, seus lançamentos de alimentação somam:
+                    <div class="preview-card">
+                      <div class="preview-label">DESPESAS · SETEMBRO <span class="draft-chip saved">calculado</span></div>
+                      <div class="query-number">R$ 684,30</div>
+                      <div class="query-breakdown">
+                        <div class="query-row"><span>12 lançamentos</span><strong>neste mês</strong></div>
+                        <div class="query-row"><span>Maior lançamento</span><strong>R$ 118,00</strong></div>
+                        <div class="query-row"><span>Último registro</span><strong>Hoje · almoço</strong></div>
+                      </div>
+                    </div>
+                    <a class="answer-cta" href="#painel">Ver no painel web <span aria-hidden="true">→</span></a>
+                    <span class="bubble-time">18:06</span>
+                  </div>
+                  <div class="bubble bubble-bot">Quer ver outra categoria ou período? <span class="bubble-time">18:06</span></div>
+                  <div class="chat-compose"><span class="compose-plus">＋</span><span class="compose-placeholder">Mensagem</span><span class="compose-mic">⌁</span></div>
+                </div>
+              </div>
+              <span class="phone-home"></span>
+            </div>
+          </div>
+
+          <div class="demo-panel" data-panel="correct">
+            <div class="phone">
+              <div class="phone-screen">
+                <div class="chat-top"><span class="back-arrow">‹</span><span class="avatar">pf</span><span class="chat-title"><strong>PocketFinance <i class="verified">✓</i></strong><span>assistente financeiro</span></span><span class="chat-menu">⋮</span></div>
+                <div class="chat-thread">
+                  <span class="day-pill">HOJE</span>
+                  <div class="bubble bubble-user">O almoço de hoje foi R$ 39,90, não R$ 42,90.<span class="bubble-time">12:54 ✓✓</span></div>
+                  <div class="bubble bubble-bot">
+                    Encontrei este lançamento. Posso atualizar?
+                    <div class="correction-summary">
+                      <strong>Almoço · hoje</strong>
+                      <span><s>R$ 42,90</s> &nbsp;→&nbsp; <b>R$ 39,90</b></span>
+                      <span>Categoria: Alimentação</span>
+                    </div>
+                    <div class="chat-actions">
+                      <button class="chat-action primary" type="button">Confirmar alteração</button>
+                      <button class="chat-action" type="button">Revisar no painel</button>
+                      <button class="chat-action" type="button">Manter como está</button>
+                    </div>
+                    <span class="bubble-time">12:54</span>
+                  </div>
+                  <div class="bubble bubble-bot">Não altero seu histórico sem sua confirmação. <span class="bubble-time">12:54</span></div>
+                  <div class="chat-compose"><span class="compose-plus">＋</span><span class="compose-placeholder">Mensagem</span><span class="compose-mic">⌁</span></div>
+                </div>
+              </div>
+              <span class="phone-home"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section dashboard-section" id="painel">
+      <div class="wrap">
+        <div class="dashboard-intro">
+          <div class="section-head">
+            <span class="eyebrow">Uma conversa não substitui a visão completa</span>
+            <h2>Do chat para um painel<br>que dá contexto.</h2>
+            <p>O WhatsApp é rápido para registrar e perguntar. Na web, você enxerga tendências, corrige detalhes e navega por todo o histórico.</p>
+          </div>
+          <p class="dashboard-caption">Prévia conceitual. Valores, nomes e lançamentos abaixo são fictícios e servem apenas para demonstrar a hierarquia da interface.</p>
+        </div>
+
+        <div class="browser-frame" role="img" aria-label="Prévia conceitual do dashboard web do PocketFinance">
+          <div class="browser-bar"><span class="browser-dot"></span><span class="browser-dot"></span><span class="browser-dot"></span><span class="browser-address"></span></div>
+          <div class="app-layout">
+            <aside class="app-sidebar">
+              <div class="app-brand"><span class="brand-mark">pf</span> PocketFinance</div>
+              <span class="sidebar-label">Seu espaço</span>
+              <a class="side-link active" href="#painel"><span class="side-icon">◫</span> Visão geral</a>
+              <a class="side-link" href="#painel"><span class="side-icon">⇄</span> Transações</a>
+              <a class="side-link" href="#painel"><span class="side-icon">▦</span> Categorias</a>
+              <span class="sidebar-label">Preferências</span>
+              <a class="side-link" href="#escopo"><span class="side-icon">⚙</span> Configurações</a>
+            </aside>
+            <div class="app-main">
+              <div class="app-heading">
+                <div><h3>Visão geral</h3><p>Seu resumo financeiro de setembro</p></div>
+                <div style="display:flex;gap:7px;align-items:center">
+                  <button class="period-select" type="button">Setembro 2026&nbsp;⌄</button>
+                  <button class="new-entry" type="button">＋ Nova transação</button>
+                </div>
+              </div>
+              <div class="kpi-grid">
+                <div class="kpi"><div class="kpi-label">Receitas</div><div class="kpi-value">R$ 4.280</div><div class="kpi-foot up">↑ 8,2% vs. mês anterior</div></div>
+                <div class="kpi"><div class="kpi-label">Despesas</div><div class="kpi-value">R$ 2.316</div><div class="kpi-foot">24 lançamentos</div></div>
+                <div class="kpi"><div class="kpi-label">Saldo do período</div><div class="kpi-value" style="color:#438158">R$ 1.964</div><div class="kpi-foot">Receitas − despesas</div></div>
+                <div class="kpi"><div class="kpi-label">Lançamentos</div><div class="kpi-value">24</div><div class="kpi-foot">3 registrados pelo chat</div></div>
+              </div>
+              <div class="dash-grid">
+                <div class="dash-card">
+                  <div class="dash-card-head"><strong>Entradas e saídas</strong><span>últimos 6 meses</span></div>
+                  <div class="chart" aria-hidden="true">
+                    <div class="month-col"><div class="bars"><i class="bar" style="height:55%"></i><i class="bar expense" style="height:42%"></i></div><small>ABR</small></div>
+                    <div class="month-col"><div class="bars"><i class="bar" style="height:67%"></i><i class="bar expense" style="height:50%"></i></div><small>MAI</small></div>
+                    <div class="month-col"><div class="bars"><i class="bar" style="height:58%"></i><i class="bar expense" style="height:48%"></i></div><small>JUN</small></div>
+                    <div class="month-col"><div class="bars"><i class="bar" style="height:74%"></i><i class="bar expense" style="height:56%"></i></div><small>JUL</small></div>
+                    <div class="month-col"><div class="bars"><i class="bar" style="height:63%"></i><i class="bar expense" style="height:51%"></i></div><small>AGO</small></div>
+                    <div class="month-col"><div class="bars"><i class="bar" style="height:84%"></i><i class="bar expense" style="height:57%"></i></div><small>SET</small></div>
+                  </div>
+                  <div class="chart-legend"><span class="legend-key"><i></i>Receitas</span><span class="legend-key"><i class="expense"></i>Despesas</span></div>
+                </div>
+                <div class="dash-card">
+                  <div class="dash-card-head"><strong>Despesas por categoria</strong><span>ver todas →</span></div>
+                  <div class="category-list">
+                    <div class="category-row"><span>Moradia</span><strong>R$ 920</strong><div class="category-track"><div class="category-fill" style="width:88%"></div></div></div>
+                    <div class="category-row"><span>Alimentação</span><strong>R$ 684</strong><div class="category-track"><div class="category-fill" style="width:66%"></div></div></div>
+                    <div class="category-row"><span>Transporte</span><strong>R$ 437</strong><div class="category-track"><div class="category-fill" style="width:42%"></div></div></div>
+                    <div class="category-row"><span>Outras</span><strong>R$ 275</strong><div class="category-track"><div class="category-fill" style="width:27%"></div></div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="dash-card" style="margin-top:10px">
+                <div class="dash-card-head"><strong>Atividade recente</strong><span>Ver transações →</span></div>
+                <table class="recent-table">
+                  <thead><tr><th>DESCRIÇÃO</th><th>CATEGORIA</th><th>ORIGEM</th><th>VALOR</th></tr></thead>
+                  <tbody>
+                    <tr><td>Almoço</td><td>Alimentação</td><td><span class="source-pill">WhatsApp</span></td><td>− R$ 42,90</td></tr>
+                    <tr><td>Mercado do bairro</td><td>Alimentação</td><td>Manual</td><td>− R$ 186,40</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Princípios de confiança</span>
+          <h2>A IA ajuda.<br>As regras protegem.</h2>
+          <p>Em finanças, velocidade não pode significar perda de controle. O desenho do produto precisa deixar isso visível a cada etapa.</p>
+        </div>
+        <div class="principles">
+          <article class="principle"><div class="principle-icon">◇</div><strong>Rascunho primeiro</strong><p>Nenhuma mensagem cria uma transação sem uma confirmação clara.</p></article>
+          <article class="principle"><div class="principle-icon">⌁</div><strong>Perguntar quando faltar dado</strong><p>Se valor, tipo ou data estiverem incertos, o assistente pede esclarecimento.</p></article>
+          <article class="principle"><div class="principle-icon">∑</div><strong>Cálculo determinístico</strong><p>Totais e períodos vêm do banco e das regras do app, não de uma resposta improvisada do modelo.</p></article>
+          <article class="principle"><div class="principle-icon">↗</div><strong>Correção sempre possível</strong><p>O histórico pode ser revisado no chat ou no painel, com confirmação para alterar.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section" id="escopo">
+      <div class="wrap">
+        <div class="section-head center">
+          <span class="eyebrow">Uma evolução em etapas</span>
+          <h2>Começar pequeno.<br>Ganhar confiança.</h2>
+          <p>Primeiro resolvemos o hábito de registrar e entender. Capacidades bancárias exigem outro produto, parceiros e controles próprios.</p>
+        </div>
+        <div class="scope-grid">
+          <article class="scope-card primary">
+            <h3>Primeira versão <span class="scope-tag">Foco</span></h3>
+            <ul>
+              <li>Lançar receitas e despesas por texto</li>
+              <li>Revisar, editar e confirmar antes de salvar</li>
+              <li>Consultar totais, período e categorias</li>
+              <li>Continuar usando o dashboard web</li>
+            </ul>
+          </article>
+          <article class="scope-card later">
+            <h3>Depois de validar</h3>
+            <ul>
+              <li>Entrada por áudio e recibos</li>
+              <li>Lembretes e lançamentos recorrentes</li>
+              <li>Importação de extratos</li>
+              <li>Insights sobre hábitos de consumo</li>
+            </ul>
+          </article>
+          <article class="scope-card out">
+            <h3>Fora deste escopo</h3>
+            <ul>
+              <li>Conta de pagamento ou saldo bancário real</li>
+              <li>Pix, boletos e movimentação de dinheiro</li>
+              <li>Open Finance nesta primeira versão</li>
+              <li>Promessas de rendimento ou crédito</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section" style="padding-top:0">
+      <div class="wrap">
+        <div class="final-cta">
+          <div>
+            <h2>Menos esforço para registrar.<br>Mais clareza para decidir.</h2>
+            <p>Essa é a proposta do PocketFinance conversacional: uma porta simples para seus dados, com um painel que mantém tudo organizado e conferível.</p>
+          </div>
+          <a class="button-primary" href="#demonstracao">Testar os cenários <span class="arrow" aria-hidden="true">↑</span></a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <span><strong>PocketFinance</strong> · visão de produto</span>
+      <span>Conceito interativo · mensagens e valores fictícios · não é uma conta bancária</span>
+    </div>
+  </footer>
+
+  <script>
+    const tabs = Array.from(document.querySelectorAll('[data-tab]'));
+    const panels = Array.from(document.querySelectorAll('[data-panel]'));
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const selected = tab.dataset.tab;
+        tabs.forEach((item) => item.setAttribute('aria-pressed', String(item === tab)));
+        panels.forEach((panel) => {
+          panel.classList.toggle('active', panel.dataset.panel === selected);
+        });
+      });
+    });
+
+    const amountInput = document.getElementById('editAmount');
+    const categoryInput = document.getElementById('editCategory');
+    const editPanel = document.getElementById('editPanel');
+    const confirmButton = document.getElementById('confirmRecord');
+    const editButton = document.getElementById('editRecord');
+    const cancelButton = document.getElementById('cancelRecord');
+    const saveEditButton = document.getElementById('saveEdit');
+    const savedReply = document.getElementById('savedReply');
+    const draftStatus = document.getElementById('draftStatus');
+    const draftAmount = document.getElementById('draftAmount');
+    const draftCategory = document.getElementById('draftCategory');
+    const confirmNote = document.getElementById('confirmNote');
+
+    editButton.addEventListener('click', () => {
+      editPanel.classList.toggle('open');
+      editButton.textContent = editPanel.classList.contains('open') ? 'Fechar edição' : 'Editar';
+      if (editPanel.classList.contains('open')) amountInput.focus();
+    });
+
+    saveEditButton.addEventListener('click', () => {
+      const normalized = amountInput.value.trim().replace('.', ',');
+      draftAmount.textContent = '− R$ ' + normalized;
+      draftCategory.textContent = categoryInput.value;
+      confirmNote.textContent = 'Rascunho atualizado. Confirme para salvar a alteração.';
+      editPanel.classList.remove('open');
+      editButton.textContent = 'Editar';
+      draftStatus.textContent = 'revisar e confirmar';
+    });
+
+    confirmButton.addEventListener('click', () => {
+      draftStatus.textContent = 'registrado';
+      draftStatus.classList.add('saved');
+      confirmNote.textContent = 'Lançamento salvo no PocketFinance. Seu painel foi atualizado.';
+      confirmButton.textContent = 'Registrado ✓';
+      confirmButton.disabled = true;
+      editButton.disabled = true;
+      cancelButton.disabled = true;
+      savedReply.hidden = false;
+    });
+
+    cancelButton.addEventListener('click', () => {
+      draftStatus.textContent = 'cancelado';
+      confirmNote.textContent = 'Este rascunho foi descartado. Nenhum lançamento foi salvo.';
+      confirmButton.disabled = true;
+      editButton.disabled = true;
+      cancelButton.disabled = true;
+    });
+  </script>
+</body>
+</html>

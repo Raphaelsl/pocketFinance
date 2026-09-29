@@ -28,9 +28,28 @@ Micro-SaaS educacional com dois objetivos:
 | Pós-C | Architecture & Code Quality | ✅ Concluído |
 | D | Dashboard & Aggregations | 🚧 Em andamento |
 | E | AI Engineering | 📝 Spec e cards preparados |
-| F | Deploy & Productionization | ⏳ Futuro |
+| F | Platform Engineering | 📝 Draft — identidade e produção |
+| G | Web Product Experience | 📝 Draft — UX e UI web |
+| H | WhatsApp Financial Assistant | 📝 Draft — assistente conversacional |
 
 **Roadmap por competências:** ver `LEARNING-ROADMAP.md`.
+
+### Épicos F–H em discussão
+
+Os próximos épicos estão em draft para revisão de produto. A intenção é dar
+propriedade e isolamento aos dados, melhorar a experiência web e então levar os
+fluxos de registro e consulta ao WhatsApp.
+
+| Épico | Spec | Resultado esperado |
+|-------|------|--------------------|
+| F — Platform Engineering | `SPEC-010-epic-f-platform-engineering.md` | Identidade, ownership dos dados, associação verificada de telefone e operação publicada |
+| G — Web Product Experience | `SPEC-011-epic-g-web-product-experience.md` | Interface web consistente, responsiva, acessível e clara para dashboard e transações |
+| H — WhatsApp Financial Assistant | `SPEC-012-epic-h-whatsapp-assistant.md` | Registrar, consultar e corrigir transações por conversa com confirmação explícita |
+
+Os drafts incluem planos de cards; as descrições Asana estão em
+`tools/specs/asana-cards/ASANA-CARDS-FGH-INDEX.md` e nos arquivos `CARD-F*`, `CARD-G*`
+e `CARD-H*`. O trabalho de descoberta F1 e G1 pode começar agora; implementação e
+integração seguem os quality gates de D e E e as dependências listadas em cada card.
 
 ---
 
